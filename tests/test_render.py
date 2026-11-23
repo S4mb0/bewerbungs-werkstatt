@@ -84,6 +84,42 @@ class KaputteDaten(unittest.TestCase):
         self.assertEqual(code, 0, aus)
         self.assertIn("Text zu 'taet-pipelines' ist inzwischen freigegeben", aus)
 
+    def test_nur_fett_geaendert_ist_keine_umformulierung(self):
+        self.ersetze("lebenslauf/lebenslauf.yaml", "{quelle: taet-pipelines}",
+                     '{quelle: taet-pipelines, text: "Entwicklung von GitLab-**CI/CD**-Pipelines bis zum produktiven Deployment"}')
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+
+    # Alle fett gesetzten Begriffe im Beispiel-Lebenslauf (Profil, Tätigkeiten, Projekte)
+    FETT_BEISPIEL = '["CI/CD", "Kubernetes", "GitLab-CI/CD-Pipelines", "Terraform", "Prometheus und Grafana", ' \
+                    '"Java", "Bash", "Python"]'
+
+    def setze_fett(self, liste: str):
+        self.ersetze("lebenslauf/lebenslauf.yaml", "schwerpunkt: devops\n", f"schwerpunkt: devops\nfett: {liste}\n")
+
+    def test_fett_liste_passt(self):
+        self.setze_fett(self.FETT_BEISPIEL.replace('"Kubernetes"', '"kubernetes"'))  # Groß-/Kleinschreibung egal
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertNotIn(".fett", aus)
+
+    def test_fett_begriff_fehlt(self):
+        self.setze_fett(self.FETT_BEISPIEL.replace('"Java"', '"Java", "Jira"'))
+        self.erwarte_fehler("'Jira' steht in 'fett', ist aber nirgends fett")
+
+    def test_fett_ohne_treffer(self):
+        self.setze_fett(self.FETT_BEISPIEL.replace('"Terraform", ', ""))
+        self.erwarte_fehler("'Terraform' ist fett (taet-terraform), steht aber nicht in 'fett'")
+
+    def test_fett_doppelt_im_bereich(self):
+        self.setze_fett(self.FETT_BEISPIEL)
+        self.ersetze("lebenslauf/lebenslauf.yaml", "{quelle: taet-pipelines}",
+                     '{quelle: taet-pipelines, text: "Entwicklung von **GitLab-CI/CD-Pipelines** für **Kubernetes**", '
+                     'umformuliert: true}')
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertIn("'Kubernetes' ist in Erfahrung und Projekten 2-mal fett", aus)
+
     def test_taetigkeit_beim_falschen_arbeitgeber(self):
         self.ersetze("lebenslauf/lebenslauf.yaml", "{quelle: taet-migrationen}", "{quelle: taet-terraform}")
         self.erwarte_fehler("gehört nicht zum Arbeitgeber 'muster-systemhaus'")

@@ -180,6 +180,7 @@ LEBENSLAUF = {
     }), False),
     "kenntnisse": ("idliste", False),
     "projekte": (("liste", AUSSAGE), False),
+    "fett": ("strliste", False),   # Treffer der Stellenausschreibung, die fett sein müssen (nur in Entwürfen)
 }
 AUSSAGE_SCHEMA = {"quelle": ("id", True), "text": ("str", False), "umformuliert": ("bool", False)}
 
@@ -678,6 +679,13 @@ def normal(text: str) -> str:
     return " ".join(str(text).split())
 
 
+FETT_MUSTER = re.compile(r"\*\*(.+?)\*\*")
+
+
+def ohne_fett(text: str) -> str:
+    return FETT_MUSTER.sub(r"\1", str(text))
+
+
 def pruefe_aussage(sd: Stammdaten, a, erwartet: str, ort: str, b: Befunde, freigegeben) -> bool:
     """Prüft Quelle und Kennzeichnung einer Aussage. freigegeben(obj) liefert die freigegebenen Texte."""
     if not isinstance(a, dict) or not a.get("quelle"):
@@ -690,7 +698,7 @@ def pruefe_aussage(sd: Stammdaten, a, erwartet: str, ort: str, b: Befunde, freig
     if a.get("umformuliert") and not a.get("text"):
         b.fehler_(ort, "umformuliert: true, aber kein 'text' angegeben")
     if a.get("text"):
-        ist_freigegeben = normal(a["text"]) in {normal(t) for t in freigegeben(obj)}
+        ist_freigegeben = normal(ohne_fett(a["text"])) in {normal(ohne_fett(t)) for t in freigegeben(obj)}
         if not a.get("umformuliert") and not ist_freigegeben:
             b.fehler_(ort, f"Text weicht von den Stammdaten zu '{a['quelle']}' ab – "
                            "als 'umformuliert: true' kennzeichnen oder freigegebenen Text verwenden")
@@ -772,7 +780,57 @@ def pruefe_lebenslauf(sd: Stammdaten, ordner: Path, b: Befunde, g: Gestaltung | 
     schalter = ll.get("schalter") or {}
     if schalter.get("foto", True) and not sd.person.get("foto"):
         b.warnung(ort, "Foto ist eingeschaltet, aber person.yaml hat kein 'foto'")
+    pruefe_fett(sd, ll, ort, b)
     return ll
+
+
+def pruefe_fett(sd: Stammdaten, ll: dict, ort: str, b: Befunde) -> None:
+    """Gleicht das Fett in Profil, Tätigkeiten und Projekten mit der Liste 'fett' ab (Treffer der Stellenausschreibung).
+
+    Fehler: ein Begriff der Liste ist nirgends fett, oder etwas ist fett, das nicht in der Liste steht.
+    Warnung: ein Begriff ist innerhalb eines Bereichs (Profil bzw. Erfahrung und Projekte) mehrmals fett.
+    Ohne Feld 'fett' (Standardlebensläufe, ältere Bewerbungen) wird nichts geprüft.
+    """
+    liste = ll.get("fett")
+    if not isinstance(liste, list):
+        return
+    o = f"{ort}.fett"
+
+    def schluessel(text: str) -> str:
+        return normal(text).casefold()
+
+    erwartet: dict[str, str] = {}
+    for x in liste:
+        if not isinstance(x, str):
+            continue  # schon von der Schemaprüfung gemeldet
+        if schluessel(x) in erwartet:
+            b.fehler_(o, f"'{x}' steht doppelt in der Liste")
+        erwartet.setdefault(schluessel(x), x)
+
+    taetigkeiten = [t for e in ll.get("berufserfahrung") or [] if isinstance(e, dict)
+                    for t in e.get("taetigkeiten") or []]
+    bereiche = {"im Profil": [ll.get("profil")],
+                "in Erfahrung und Projekten": taetigkeiten + list(ll.get("projekte") or [])}
+    gefunden: set[str] = set()
+    for bereich, aussagen in bereiche.items():
+        anzahl: dict[str, int] = {}
+        for a in aussagen:
+            if not isinstance(a, dict) or not isinstance(a.get("quelle"), str) or sd.art(a["quelle"]) is None:
+                continue  # schon als ungültige Aussage gemeldet
+            for span in FETT_MUSTER.findall(aussage_text(sd, a)["text"] or ""):
+                k = schluessel(span)
+                anzahl[k] = anzahl.get(k, 0) + 1
+                if k not in erwartet:
+                    b.fehler_(o, f"'{normal(span)}' ist fett ({a['quelle']}), steht aber nicht in 'fett' – "
+                                 "nur Treffer der Stellenausschreibung fett setzen oder den Begriff ergänzen")
+        for k, n in anzahl.items():
+            if n > 1 and k in erwartet:
+                b.warnung(o, f"'{erwartet[k]}' ist {bereich} {n}-mal fett – nur beim ersten Vorkommen fett setzen")
+        gefunden |= anzahl.keys()
+    for k, x in erwartet.items():
+        if k not in gefunden:
+            b.fehler_(o, f"'{x}' steht in 'fett', ist aber nirgends fett – als **{x}** in Profil, Tätigkeit oder "
+                         "Projekt setzen oder aus der Liste nehmen")
 
 
 # --------------------------------------------------------------------------- Aufbereitung
@@ -877,7 +935,7 @@ def baue_kontext(sd: Stammdaten, ll: dict) -> dict:
 def auszeichnung(text: str) -> markupsafe.Markup:
     """Escaped den Text und erlaubt **fett** als einzige Auszeichnung."""
     sicher = str(markupsafe.escape(text))
-    return markupsafe.Markup(re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", sicher))
+    return markupsafe.Markup(FETT_MUSTER.sub(r"<b>\1</b>", sicher))
 
 
 def rendere_html(kontext: dict, grundlayout: str, stil: dict) -> str:
