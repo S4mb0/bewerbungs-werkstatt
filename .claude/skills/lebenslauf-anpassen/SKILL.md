@@ -53,7 +53,14 @@ Fertig, wenn jede Anforderung entweder Treffer mit mindestens einer ID oder Lüc
    - **Profil**: startet vom Profiltext des Schwerpunkts und stellt die Treffer nach vorn (`umformuliert: true`).
    - **Tätigkeiten**: Treffer nach vorn, passende Tätigkeiten aus den Stammdaten ergänzen, unpassende ans Ende oder raus. Begriffe der Anzeige dürfen in den `text`, Fakten nur aus derselben Quelle.
    - **Kenntnisse** und **Projekte**: Treffer rein und nach vorn, Unpassendes raus.
-3. `entwurf/bewerbung.yaml` anlegen:
+3. **Fett** neu setzen, nur für Treffer:
+   - Fett wird jeder Begriff, der eine Muss- oder Kann-Anforderung trifft: wörtlich aus der Anzeige (Jira, CI/CD, Code Reviews) oder als konkrete Erfüllung einer abstrakten Anforderung („Cloud-Plattformen“ → **AWS**, „Infrastructure-as-Code“ → **Terraform**). Soft Skills werden nie fett.
+   - Jeder solche Begriff muss fett in Profil, Tätigkeit oder Projekt stehen. Deckt ihn bisher nur ein Skill, zieh eine Tätigkeit nach, die ihn belegt (auch aus `details`, z. B. „Scrum mit **Jira**“, `umformuliert: true`). Gibt es keine, bleibt er nur in den Kenntnissen und kommt beim Zeigen unter „nicht fett“.
+   - Alles andere Fett aus Standard und Stammdaten entfernst du. In den Kenntnissen ist nie etwas fett.
+   - Je Begriff einmal fett im Profil und einmal in Erfahrung und Projekten, jeweils beim ersten Vorkommen. Fett ist nur der Begriff (1–3 Wörter): `**AWS** und **Kubernetes**`, nicht `**AWS und Kubernetes**`.
+   - Ändert sich an einer Zeile nur das Fett, braucht sie kein `umformuliert: true`.
+   - Trag die Begriffe genau so, wie sie fett im Text stehen, als Liste direkt unter `schwerpunkt:` (bzw. `template:`) in `entwurf/lebenslauf.yaml` ein: `fett: [Jira, Confluence, AWS, Terraform]`. `render.py` meldet einen Fehler, wenn ein Begriff der Liste nirgends fett ist oder etwas fett ist, das nicht in der Liste steht, und warnt bei mehrfachem Fett.
+4. `entwurf/bewerbung.yaml` anlegen:
 
    ```yaml
    firma: <Firma>
@@ -63,7 +70,7 @@ Fertig, wenn jede Anforderung entweder Treffer mit mindestens einer ID oder Lüc
    status: entwurf
    ```
 
-Fertig, wenn jede Aussage im Entwurf eine `quelle` hat und jeder umformulierte `text` als `umformuliert: true` markiert ist.
+Fertig, wenn jede Aussage im Entwurf eine `quelle` hat, jeder umformulierte `text` als `umformuliert: true` markiert ist und `fett` jeden Treffer mit konkretem Begriff enthält, der in Fließtext belegt ist.
 
 ## 4. Rendern und kürzen
 
@@ -80,7 +87,7 @@ python render.py entwurf
      (`<venv-python>` siehe `regeln.md`, „Umgebung“.) Kürze den Text des Eintrags davor so weit, dass er eine Zeile weniger braucht (`umformuliert: true`). Zeilen mit festem Inhalt, etwa Abschnittstitel oder Abschlüsse, bleiben, wie sie sind.
   2. **Inhalt**: Was am wenigsten zur Anzeige passt, kommt raus, zuerst Projekte, dann Tätigkeiten, dann Kenntnisse.
 
-  Merk dir alles, was gestrichen wurde.
+  Merk dir alles, was gestrichen wurde. Verschwindet dabei ein Begriff aus `fett` aus dem Text, setz ihn in einer anderen Zeile fett oder nimm ihn aus der Liste und nenn ihn.
 - Bei Templates mit Spalten (z. B. `zwei-spalten`) meldet `render.py` die Höhe jeder Spalte (`SPALTEN …`):
   - `WARNUNG  Spalte 'seite' … braucht eine Seite mehr`: Die Seitenleiste bestimmt die Seitenzahl. Kürze **in dieser Spalte**, also bei den Kenntnissen (die am wenigsten zur Anzeige passen zuerst), nicht bei Tätigkeiten oder Projekten.
   - `HINWEIS  Spalte …`: Die Seitenleiste ist länger als die Hauptspalte, passt aber. Du kürzt nicht, du nennst es nur beim Zeigen.
@@ -95,6 +102,7 @@ Eine Nachricht, ohne Zwischenstopp davor:
 - das PDF (`entwurf/lebenslauf.pdf`) als Datei
 - **Schwerpunkt** mit einem Satz Begründung
 - **Treffer**: Anforderung → was im Lebenslauf dafür steht
+- **Fett**: die Liste `fett`, und welche Treffer nur in den Kenntnissen stehen und deshalb nicht fett sind
 - **Lücken**: jede mit der Frage „Hast du X? Wo ist es belegt?“
 - **Gestrichen**: was beim Kürzen rausflog
 - Seitenzahl

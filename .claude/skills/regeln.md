@@ -64,7 +64,7 @@ Zusätzliche Regeln:
 - Abschluss `abgeschlossen` braucht `bis`, `laufend` braucht `von`. Projekt `beruflich` braucht `position`.
 - `position`, `skills` und `schwerpunkte` verweisen auf existierende IDs der passenden Art.
 - `anlage` ist ein Pfad relativ zu `daten/`, meist `anlagen/<sprechender-name>.pdf`.
-- Kernaussagen, Formulierungen und Profiltexte dürfen `**fett**` enthalten, das Template übernimmt es.
+- Kernaussagen, Formulierungen und Profiltexte dürfen `**fett**` enthalten, das Template übernimmt es. Dieses Fett gilt für die Standardlebensläufe; im angepassten Lebenslauf bestimmt die Anzeige, was fett ist (`lebenslauf-anpassen`, Feld `fett`). Ein Text, der sich nur im Fett von den Stammdaten unterscheidet, gilt als freigegeben.
 - Kommentare im YAML halten Herkunft und Klärungen fest (z. B. `# laut Arbeitszeugnis 30.04.2020`).
 
 **Belege** sind die `skills`-Verweise von Tätigkeiten, Projekten und Abschlüssen. Wer einen Skill erfasst, hängt ihn an mindestens eine Tätigkeit, ein Projekt oder einen Abschluss.
