@@ -7,7 +7,7 @@ description: Richtet die Bewerbungs-Werkstatt für einen neuen Nutzer ein - Umge
 
 Ein neuer Nutzer hat das System geklont. Am Ende hat er ein eigenes Daten-Repo `daten/` mit geprüften Stammdaten und mindestens einem freigegebenen Standardlebenslauf, und kann mit `lebenslauf-anpassen` loslegen.
 
-Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jeden Eintrag, jede ID und jeden Commit. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner. Unter macOS/Linux heißt Python meist `python3`.
+Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jeden Eintrag, jede ID und jeden Commit. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner. Zuerst die Update-Prüfung aus `regeln.md` (Abschnitt „Umgebung“), einmal pro Gespräch. Unter macOS/Linux heißt Python meist `python3`.
 
 Das Ziel ist Faktentreue: In die Stammdaten kommt nur, was der Nutzer bestätigt. Was du aus Dokumenten liest, ist ein **Vorschlag**, bis er es freigibt.
 
