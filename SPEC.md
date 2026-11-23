@@ -93,7 +93,7 @@ Feste Regeln:
 Regeln:
 - Umformulieren ist erlaubt, auch mit Begriffen aus der Anzeige, aber **nur mit Fakten aus den Stammdaten**.
 - Jede Aussage trägt eine Quellen-ID, umformulierte Stellen sind markiert. Nur geändertes Fett zählt nicht als Umformulierung.
-- **Fett** zeigt im angepassten Lebenslauf genau die Treffer zur Anzeige (wörtliche Begriffe und die konkrete Erfüllung abstrakter Anforderungen), jeden einmal im Profil und einmal in Erfahrung und Projekten, nie in den Kenntnissen. Die Liste steht im Feld `fett` des Lebenslaufs, `render.py` gleicht sie ab.
+- **Fett** zeigt im angepassten Lebenslauf genau die Treffer zur Anzeige (wörtliche Begriffe und die konkrete Erfüllung abstrakter Anforderungen), jeden höchstens einmal je Bereich (Profil, Berufserfahrung, Projekte), nie in den Kenntnissen. Die Liste steht im Feld `fett` des Lebenslaufs, `render.py` gleicht sie ab.
 - Lücken kommen erst in die Stammdaten und erst danach in den Lebenslauf.
 - Ändern sich die Stammdaten, schlägt der Skill vor, die Standardlebensläufe nachzuziehen. Automatisch passiert das nie.
 

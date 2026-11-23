@@ -57,7 +57,7 @@ Fertig, wenn jede Anforderung entweder Treffer mit mindestens einer ID oder Lüc
    - Fett wird jeder Begriff, der eine Muss- oder Kann-Anforderung trifft: wörtlich aus der Anzeige (Jira, CI/CD, Code Reviews) oder als konkrete Erfüllung einer abstrakten Anforderung („Cloud-Plattformen“ → **AWS**, „Infrastructure-as-Code“ → **Terraform**). Soft Skills werden nie fett.
    - Jeder solche Begriff muss fett in Profil, Tätigkeit oder Projekt stehen. Deckt ihn bisher nur ein Skill, zieh eine Tätigkeit nach, die ihn belegt (auch aus `details`, z. B. „Scrum mit **Jira**“, `umformuliert: true`). Gibt es keine, bleibt er nur in den Kenntnissen und kommt beim Zeigen unter „nicht fett“.
    - Alles andere Fett aus Standard und Stammdaten entfernst du. In den Kenntnissen ist nie etwas fett.
-   - Je Begriff einmal fett im Profil und einmal in Erfahrung und Projekten, jeweils beim ersten Vorkommen. Fett ist nur der Begriff (1–3 Wörter): `**AWS** und **Kubernetes**`, nicht `**AWS und Kubernetes**`.
+   - Je Begriff höchstens einmal fett pro Bereich (Profil, Berufserfahrung, Projekte), jeweils beim ersten Vorkommen im Bereich. Fett ist nur der Begriff (1–3 Wörter): `**AWS** und **Kubernetes**`, nicht `**AWS und Kubernetes**`.
    - Ändert sich an einer Zeile nur das Fett, braucht sie kein `umformuliert: true`.
    - Trag die Begriffe genau so, wie sie fett im Text stehen, als Liste direkt unter `schwerpunkt:` (bzw. `template:`) in `entwurf/lebenslauf.yaml` ein: `fett: [Jira, Confluence, AWS, Terraform]`. `render.py` meldet einen Fehler, wenn ein Begriff der Liste nirgends fett ist oder etwas fett ist, das nicht in der Liste steht, und warnt bei mehrfachem Fett.
 4. `entwurf/bewerbung.yaml` anlegen:
