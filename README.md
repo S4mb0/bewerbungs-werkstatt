@@ -27,6 +27,20 @@ Ein GitHub-Account ist **nicht** nötig. Was fehlt, meldet `einrichten.py` mit d
 
 ## Installation
 
+### Einfach Claude fragen
+
+Öffne Claude Code in einem beliebigen Ordner und sag:
+
+> Installiere für mich https://github.com/S4mb0/bewerbungs-werkstatt
+
+Claude liest diese Anleitung, fragt dich, wohin das System soll, klont es dorthin und führt `einrichten.py` aus. Fehlt etwas wie Python, git oder ein Browser, nennt Claude dir den Befehl zum Installieren. Befehle führt Claude erst nach deiner Bestätigung aus.
+
+Danach **öffnest du den neuen Ordner `bewerbungs-werkstatt` in Claude Code**. Das geht in einem Terminal mit `cd bewerbungs-werkstatt` und `claude`, in der Desktop-App über einen neuen Chat in diesem Ordner. Die Skills der Werkstatt kennt Claude nur, wenn es in diesem Ordner gestartet wurde. Dort sagst du:
+
+> Richte mich ein.
+
+### Von Hand
+
 ```bash
 git clone https://github.com/S4mb0/bewerbungs-werkstatt.git
 cd bewerbungs-werkstatt
@@ -36,6 +50,8 @@ python einrichten.py        # macOS/Linux: python3 einrichten.py
 Dann den Ordner in Claude Code öffnen und sagen:
 
 > Richte mich ein.
+
+### Danach
 
 Der Skill `einrichten` führt durch alles Weitere. Halte am besten deinen bisherigen Lebenslauf (PDF oder Word) bereit, dazu Zeugnisse und ein Bewerbungsfoto, falls du eins verwenden willst. Du kannst jederzeit abbrechen und später weitermachen.
 
@@ -122,6 +138,15 @@ Meldet `render.py` „zuerst migrieren“, genügt `python einrichten.py --migri
 - **Regel für Datenänderungen:** Wer etwas ändert, das vorhandene Daten ungültig macht (Feld umbenannt, neues Pflichtfeld, Datei verschoben), erhöht die Schemaversion. Dazu gehören eine Migration in `migrationen.py` und Altdaten unter `tests/schemas/v<N>/`. Ein Test erzwingt das. Neue *optionale* Felder brauchen keine Migration.
 - Entscheidungen und Begriffe: [SPEC.md](SPEC.md), [GLOSSARY.md](GLOSSARY.md). Die Regeln, an die sich die Skills halten: [.claude/skills/regeln.md](.claude/skills/regeln.md).
 - Geplant: Anschreiben aus den eigenen freigegebenen Formulierungen, englische Unterlagen, Bewerbungsmappe als ein PDF.
+
+## Für Claude: Installation auf Zuruf
+
+Bittet dich jemand, dieses Repo zu installieren, und es gibt noch keinen Klon:
+
+1. Frag, in welchen Ordner das System soll. Schlag einen Unterordner `bewerbungs-werkstatt` im aktuellen Arbeitsordner oder im Benutzerordner vor. Existiert dort schon ein Klon, nimm ihn und hol nur Updates (`python einrichten.py --aktualisieren`).
+2. `git clone https://github.com/S4mb0/bewerbungs-werkstatt.git <ordner>`. Ein GitHub-Account ist dafür nicht nötig. Fehlt git, nenn den Installationsbefehl für das Betriebssystem (Windows: `winget install Git.Git`, macOS: `xcode-select --install`, Linux: `sudo apt install git`) und warte.
+3. Im Klon `python einrichten.py` ausführen (macOS/Linux: `python3`). Was es als fehlend meldet, gibst du mit dem ausgegebenen Befehl an den Nutzer weiter. Installiere nichts auf Systemebene ohne seine Zustimmung.
+4. Ist alles bereit, sag dem Nutzer, dass er Claude Code **im Klon-Ordner neu öffnen** soll, damit die Skills geladen werden, und dort „Richte mich ein.“ sagen soll. Leg keine persönlichen Daten an, bevor der Skill `einrichten` läuft.
 
 ## Lizenz
 
