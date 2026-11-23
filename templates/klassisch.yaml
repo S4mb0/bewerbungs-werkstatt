@@ -1,0 +1,11 @@
+# Template „klassisch“: einspaltig, schlicht, sehr ATS-freundlich.
+beschreibung: Einspaltig in Dunkelblau mit Foto rechts, Überschriften mit Linie, Schrift Source Sans 3.
+grundlayout: klassisch
+farbe: "#1f4e79"
+linienfarbe: "#c9d3de"
+schrift: source-sans-3
+foto:
+  form: eckig
+  position: rechts
+ueberschriften: linie
+reihenfolge: [berufserfahrung, ausbildung, kenntnisse, projekte]

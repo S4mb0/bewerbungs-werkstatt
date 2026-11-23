@@ -1,0 +1,73 @@
+{#- Grundlayout „zwei-spalten“: Hauptspalte mit Name, Profil, Berufserfahrung …, Seitenleiste mit Foto, Kontakt, Kenntnissen.
+    Für ATS steht die Hauptspalte im HTML zuerst; die Seitenleiste wird nur optisch daneben gesetzt (Grid ohne `order`).
+    stil.foto.position wählt die Seite der Seitenleiste. data-spalte markiert die Spalten für die Überlaufprüfung in render.py. -#}
+{%- import "_abschnitte.html.j2" as A with context -%}
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lebenslauf {{ person.name }}</title>
+<style>
+  {{- A.schriften(stil) }}
+  @page { size: A4; margin: 11mm 12mm 9mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: {{ stil.schrift.stack | safe }}; color: #222; font-size: 9.2pt; line-height: 1.28; }
+  @media screen {
+    body { background: #e9ecef; }
+    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 11mm 12mm 9mm; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  }
+  p { margin: 0; } ul { margin: 1mm 0 0; padding-left: 4.5mm; } li { margin: .2mm 0; break-inside: avoid; }
+  .muted { color: #5a5a5a; }
+
+  .page { --acc: {{ stil.farbe }}; --line: {{ stil.linienfarbe }}; --flaeche: {{ stil.flaeche }}; }
+  .raster { display: grid; grid-template-columns: {% if stil.foto.position == "rechts" %}1fr 56mm{% else %}56mm 1fr{% endif %}; column-gap: 6mm; align-items: start; }
+  main { grid-column: {% if stil.foto.position == "rechts" %}1{% else %}2{% endif %}; grid-row: 1; min-width: 0; }
+  aside { grid-column: {% if stil.foto.position == "rechts" %}2{% else %}1{% endif %}; grid-row: 1; min-width: 0;
+          background: var(--flaeche); padding: 4mm 4mm 3mm; }
+
+  h1 { margin: 0; font-size: 21pt; font-weight: 600; line-height: 1.1; color: var(--acc); }
+  .sub { margin: 1mm 0 0; font-size: 11pt; color: #5a5a5a; }
+  .profil { margin-top: 2.5mm; padding-bottom: 2.5mm; border-bottom: 2px solid var(--acc); }
+
+  .photo { display: block; width: 34mm; height: 45mm; object-fit: cover; margin: 0 auto 3mm; }
+  {%- if stil.foto.form == "rund" %}
+  .photo { width: 38mm; height: 38mm; border-radius: 50%; object-position: 50% 15%; }
+  {%- endif %}
+  .kontakt p { margin-bottom: .8mm; overflow-wrap: anywhere; }
+
+  h2 { font-size: 10.5pt; color: var(--acc); text-transform: uppercase; letter-spacing: 1px; margin: 3mm 0 1.6mm; padding-bottom: .8mm; border-bottom: 1px solid var(--line); break-after: avoid; }
+  {%- if stil.ueberschriften == "balken" %}
+  h2 { border-bottom: none; border-left: 2.5pt solid var(--acc); padding: .3mm 0 .3mm 2mm; }
+  {%- elif stil.ueberschriften == "fett" %}
+  h2 { border-bottom: none; padding-bottom: 0; }
+  {%- endif %}
+  aside h2 { font-size: 9.6pt; margin-top: 3.5mm; }
+  aside h2:first-child { margin-top: 0; }
+  .entry { margin-bottom: 1.6mm; break-inside: avoid; }
+  .head { display: flex; justify-content: space-between; gap: 4mm; }
+  .title { font-weight: 600; } .date { color: #5a5a5a; white-space: nowrap; } .org { color: #5a5a5a; font-style: italic; }
+  dl { margin: 0; } dt { font-weight: 600; margin-top: 1.4mm; } dt:first-child { margin-top: 0; } dd { margin: .2mm 0 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="raster">
+    <main data-spalte="haupt">
+      <h1>{{ person.name }}</h1>
+      {%- if untertitel %}<p class="sub">{{ untertitel }}</p>{% endif %}
+      {%- if profil %}
+      <p class="profil" data-quelle="{{ profil.quelle }}"{% if profil.umformuliert %} data-umformuliert="ja"{% endif %}>{{ profil.text | auszeichnung }}</p>
+      {%- endif %}
+      {%- for name in stil.spalten.haupt %}{{ A.abschnitt(name) }}{% endfor %}
+    </main>
+    <aside data-spalte="seite">
+      {%- if foto %}<img class="photo" src="{{ foto }}" alt="Bewerbungsfoto">{% endif %}
+      <h2>Kontakt</h2>
+      <div class="kontakt">{% for k in person.kontakt %}<p>{{ k }}</p>{% endfor %}</div>
+      {%- for name in stil.spalten.seite %}{{ A.abschnitt(name) }}{% endfor %}
+    </aside>
+  </div>
+</div>
+</body>
+</html>

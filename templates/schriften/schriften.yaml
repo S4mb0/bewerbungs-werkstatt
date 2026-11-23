@@ -1,0 +1,36 @@
+# Schriften, die ein Template wählen darf.
+# Schriften aus dem Repo liegen in diesem Ordner und brauchen eine freie Lizenz (SIL OFL), damit das PDF
+# überall gleich aussieht und das System weitergegeben werden kann.
+# system: true heißt: nicht im Repo, muss auf dem Rechner installiert sein (nicht für die allgemeine Nutzung).
+schriften:
+  - id: segoe-ui
+    name: Segoe UI
+    stack: '"Segoe UI", Calibri, Arial, sans-serif'
+    system: true
+  - id: inter
+    name: Inter
+    stack: '"Inter", sans-serif'
+    lizenz: SIL OFL 1.1 (inter/OFL.txt)  # Inter (rsms), modern und sehr gut lesbar; Quelle @fontsource/inter, Subset latin
+    dateien:
+      - {datei: inter/inter-latin-400-normal.woff2, gewicht: 400, stil: normal}
+      - {datei: inter/inter-latin-400-italic.woff2, gewicht: 400, stil: italic}
+      - {datei: inter/inter-latin-600-normal.woff2, gewicht: 600, stil: normal}
+      - {datei: inter/inter-latin-700-normal.woff2, gewicht: 700, stil: normal}
+  - id: source-sans-3
+    name: Source Sans 3
+    stack: '"Source Sans 3", sans-serif'
+    lizenz: SIL OFL 1.1 (source-sans-3/OFL.txt)  # Adobe Source Sans 3, schlicht und serifenlos; Quelle @fontsource/source-sans-3, Subset latin
+    dateien:
+      - {datei: source-sans-3/source-sans-3-latin-400-normal.woff2, gewicht: 400, stil: normal}
+      - {datei: source-sans-3/source-sans-3-latin-400-italic.woff2, gewicht: 400, stil: italic}
+      - {datei: source-sans-3/source-sans-3-latin-600-normal.woff2, gewicht: 600, stil: normal}
+      - {datei: source-sans-3/source-sans-3-latin-700-normal.woff2, gewicht: 700, stil: normal}
+  - id: source-serif-4
+    name: Source Serif 4
+    stack: '"Source Serif 4", serif'
+    lizenz: SIL OFL 1.1 (source-serif-4/OFL.txt)  # Adobe Source Serif 4, mit Serifen für ein klassisch-konservatives Bild; Quelle @fontsource/source-serif-4, Subset latin
+    dateien:
+      - {datei: source-serif-4/source-serif-4-latin-400-normal.woff2, gewicht: 400, stil: normal}
+      - {datei: source-serif-4/source-serif-4-latin-400-italic.woff2, gewicht: 400, stil: italic}
+      - {datei: source-serif-4/source-serif-4-latin-600-normal.woff2, gewicht: 600, stil: normal}
+      - {datei: source-serif-4/source-serif-4-latin-700-normal.woff2, gewicht: 700, stil: normal}

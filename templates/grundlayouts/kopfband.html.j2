@@ -1,0 +1,73 @@
+{#- Grundlayout „kopfband“: einspaltig, farbiges Band über die volle Breite oben mit Name, Untertitel, Kontakt und Foto,
+    darunter Profil und die Abschnitte. Das Band beginnt auf Seite 1 am Blattrand (@page :first ohne Rand oben);
+    Folgeseiten haben normale Ränder. Text im Band ist weiß, daher prüft render.py den Kontrast der Farbe. -#}
+{%- import "_abschnitte.html.j2" as A with context -%}
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lebenslauf {{ person.name }}</title>
+<style>
+  {{- A.schriften(stil) }}
+  @page { size: A4; margin: 11mm 0 9mm; }
+  @page :first { margin-top: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: {{ stil.schrift.stack | safe }}; color: #222; font-size: 9.2pt; line-height: 1.28; }
+  @media screen {
+    body { background: #e9ecef; }
+    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 0 0 9mm; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  }
+  p { margin: 0; } ul { margin: 1mm 0 0; padding-left: 4.5mm; } li { margin: .2mm 0; break-inside: avoid; }
+  .muted { color: #5a5a5a; }
+
+  .page { --acc: {{ stil.farbe }}; --line: {{ stil.linienfarbe }}; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 8mm;
+           background: var(--acc); color: #fff; padding: 9mm 12mm 6mm;
+           -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  {%- if stil.foto.position == "links" %}
+  header { flex-direction: row-reverse; justify-content: flex-end; }
+  {%- endif %}
+  header > div { flex: 1; min-width: 0; }
+  h1 { margin: 0; font-size: 22pt; font-weight: 600; line-height: 1.1; }
+  {#- Keine opacity für Text: Chrome legt ihn sonst in eine eigene Ebene, und ATS lesen ihn erst am Seitenende. #}
+  .sub { margin: 1mm 0 2mm; font-size: 11pt; color: {{ stil.auf_farbe_hell }}; }
+  .contact span + span::before { content: "·"; margin: 0 2.2mm; color: {{ stil.auf_farbe_gedaempft }}; }
+  .photo { width: 27mm; height: 36mm; object-fit: cover; flex: none; border: 1mm solid {{ stil.auf_farbe_hell }}; }
+  {%- if stil.foto.form == "rund" %}
+  .photo { width: 34mm; height: 34mm; border-radius: 50%; object-position: 50% 15%; }
+  {%- endif %}
+  .inhalt { padding: 0 12mm; }
+  .profil { margin-top: 3mm; }
+  h2 { font-size: 10.5pt; color: var(--acc); text-transform: uppercase; letter-spacing: 1px; margin: 3mm 0 1.6mm; padding-bottom: .8mm; border-bottom: 1px solid var(--line); break-after: avoid; }
+  {%- if stil.ueberschriften == "balken" %}
+  h2 { border-bottom: none; border-left: 2.5pt solid var(--acc); padding: .3mm 0 .3mm 2mm; }
+  {%- elif stil.ueberschriften == "fett" %}
+  h2 { border-bottom: none; padding-bottom: 0; }
+  {%- endif %}
+  .entry { margin-bottom: 1.6mm; break-inside: avoid; }
+  .head { display: flex; justify-content: space-between; gap: 4mm; }
+  .title { font-weight: 600; } .date { color: #5a5a5a; white-space: nowrap; } .org { color: #5a5a5a; font-style: italic; }
+  dl { display: grid; grid-template-columns: max-content 1fr; row-gap: .8mm; column-gap: 4mm; margin: 0; }
+  dt { font-weight: 600; } dd { margin: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>{{ person.name }}</h1>
+      {%- if untertitel %}<p class="sub">{{ untertitel }}</p>{% endif %}
+      <p class="contact">{% for k in person.kontakt %}<span>{{ k }}</span>{% endfor %}</p>
+    </div>
+    {%- if foto %}<img class="photo" src="{{ foto }}" alt="Bewerbungsfoto">{% endif %}
+  </header>
+  <div class="inhalt">
+    {%- if profil %}
+    <p class="profil" data-quelle="{{ profil.quelle }}"{% if profil.umformuliert %} data-umformuliert="ja"{% endif %}>{{ profil.text | auszeichnung }}</p>
+    {%- endif %}
+    {%- for name in stil.spalten.haupt %}{{ A.abschnitt(name) }}{% endfor %}
+  </div>
+</div>
+</body>
+</html>

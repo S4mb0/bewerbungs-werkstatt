@@ -1,0 +1,7 @@
+# Grundlayout „kopfband“ – welche Parameter ein Template hier setzen darf.
+beschreibung: Einspaltig mit farbigem Band über die volle Breite oben (Name, Untertitel, Kontakt, Foto), darunter Profil und Werdegang. Modern, aber ATS-freundlich wie klassisch.
+foto_positionen: [rechts, links]
+# Name und Kontakt stehen weiß auf der Akzentfarbe: render.py prüft den Kontrast.
+weisser_text_auf_farbe: true
+spalten:
+  haupt: [berufserfahrung, ausbildung, kenntnisse, projekte]

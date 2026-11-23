@@ -1,0 +1,6 @@
+# Grundlayout „klassisch“ – welche Parameter ein Template hier setzen darf.
+beschreibung: Einspaltig, Name, Kontakt und Profil im Kopf, Foto daneben. Konservativ und sehr ATS-freundlich.
+foto_positionen: [rechts, links]
+# Spalten mit den Abschnitten, die darin stehen. Die Reihenfolge innerhalb einer Spalte bestimmt das Template.
+spalten:
+  haupt: [berufserfahrung, ausbildung, kenntnisse, projekte]

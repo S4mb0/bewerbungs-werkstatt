@@ -1,0 +1,92 @@
+# BEISPIEL – erfundene Arbeitgeber und Tätigkeiten.
+arbeitgeber:
+  - id: beispiel-technik
+    name: Beispiel Technik GmbH
+    ort: Musterstadt
+    positionen:
+      - id: beispiel-technik-festanstellung
+        art: Festanstellung
+        titel: Software-Entwickler / DevOps
+        von: "2023-09"
+        bis: heute
+        taetigkeiten:
+          - id: taet-k8s-betrieb
+            kernaussage: Betrieb von Microservices auf **Kubernetes** inklusive Pflege der Manifeste
+            details: Platzhalter – rund 20 Dienste in drei Umgebungen.
+            formulierungen:
+              - Verantwortlich für den Betrieb von Microservices auf **Kubernetes**
+            schwerpunkte: [devops]
+            skills: [skill-kubernetes]
+          - id: taet-terraform
+            kernaussage: Bereitstellung von Cloud-Infrastruktur als Code mit **Terraform**
+            details: Platzhalter – Module für Queues und Objektspeicher.
+            schwerpunkte: [devops]
+            skills: [skill-terraform]
+          - id: taet-pipelines
+            kernaussage: Entwicklung von **GitLab-CI/CD-Pipelines** bis zum produktiven Deployment
+            details: Platzhalter – inklusive Downstream-Pipelines.
+            schwerpunkte: [devops, softwareentwicklung]
+            skills: [skill-gitlab-ci]
+          - id: taet-monitoring
+            kernaussage: Logging, Monitoring und Fehleranalyse mit **Prometheus und Grafana**
+            details: Platzhalter.
+            schwerpunkte: [devops]
+            skills: [skill-monitoring]
+          - id: taet-lasttests
+            kernaussage: Konzeption und Auswertung von Lasttests als Grundlage für Performance-Optimierungen
+            details: Platzhalter.
+            schwerpunkte: [devops, softwareentwicklung]
+            skills: [skill-python]
+      - id: beispiel-technik-werkstudent
+        art: Werkstudent
+        titel: Werkstudent Softwareentwicklung
+        von: "2022-01"
+        bis: "2023-08"
+        taetigkeiten:
+          - id: taet-java-dienste
+            kernaussage: Entwicklung und Wartung von Backend-Diensten in **Java**
+            details: Platzhalter.
+            schwerpunkte: [softwareentwicklung]
+            skills: [skill-java]
+      - id: beispiel-technik-praktikum
+        art: Praktikum
+        titel: Praktikant
+        von: "2021-08"
+        bis: "2021-12"
+        taetigkeiten:
+          - id: taet-scrum
+            kernaussage: Mitarbeit in einem Scrum-Team
+            details: Platzhalter.
+            schwerpunkte: [softwareentwicklung]
+            skills: [skill-scrum]
+  - id: muster-systemhaus
+    name: Muster Systemhaus AG
+    ort: Beispielhausen
+    positionen:
+      - id: muster-festanstellung
+        art: Festanstellung
+        titel: IT-Systemtechniker
+        von: "2019-06"
+        bis: "2020-04"
+        taetigkeiten:
+          - id: taet-server-betrieb
+            kernaussage: Betrieb und Administration von Server- und Client-Infrastrukturen
+            details: Platzhalter.
+            schwerpunkte: [it-administration, devops]
+            skills: [skill-linux, skill-virtualisierung]
+          - id: taet-migrationen
+            kernaussage: Planung und Durchführung von Servermigrationen inklusive Datenübernahme
+            details: Platzhalter.
+            schwerpunkte: [it-administration]
+            skills: [skill-virtualisierung]
+      - id: muster-ausbildung
+        art: Ausbildung
+        titel: Auszubildender Fachinformatiker Systemintegration
+        von: "2016-09"
+        bis: "2019-05"
+        taetigkeiten:
+          - id: taet-skripte
+            kernaussage: Automatisierung wiederkehrender Administrationsaufgaben mit **Bash**
+            details: Platzhalter.
+            schwerpunkte: [it-administration, devops]
+            skills: [skill-bash, skill-linux]
