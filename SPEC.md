@@ -23,7 +23,10 @@ Feste Regeln:
 | `templates/grundlayouts/` | Grundlayouts (Jinja2 + erlaubte Parameter) |
 | `templates/schriften/` | Schriften mit freier Lizenz (SIL OFL) |
 | `beispiel/` | vollständige Beispieldaten (erfundene Person), für Tests und Vorschaubilder |
-| `tests/` | Tests für `render.py` |
+| `tests/` | Tests für `render.py`, Migrationen und `einrichten.py`; `tests/schemas/v<N>/` Altdaten je Schemaversion |
+| `docs/` | Vorschaubilder der Templates für die README (aus den Beispieldaten) |
+| `README.md`, `LICENSE` | Anleitung für Nutzer; MIT (Schriften: OFL) |
+| `.github/workflows/tests.yml` | CI auf Windows, macOS, Linux |
 | `einrichten.py`, `migrationen.py`, `umgebung.py` | Umgebung einrichten, Daten anlegen, migrieren, aktualisieren |
 | `.claude/skills/einrichten/` | Skill: Ersteinrichtung – Daten-Repo, Person und Foto, Import, Schwerpunkte, Template, Standardlebensläufe |
 | `.claude/skills/stammdaten-pflegen/` | Skill: Stammdaten erfassen, ändern, Schwerpunkte anlegen |
