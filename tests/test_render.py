@@ -118,7 +118,15 @@ class KaputteDaten(unittest.TestCase):
                      'umformuliert: true}')
         code, aus = self.pruefen()
         self.assertEqual(code, 0, aus)
-        self.assertIn("'Kubernetes' ist in Erfahrung und Projekten 2-mal fett", aus)
+        self.assertIn("'Kubernetes' ist in der Berufserfahrung 2-mal fett", aus)
+
+    def test_fett_in_erfahrung_und_projekten_je_einmal(self):
+        self.setze_fett(self.FETT_BEISPIEL)
+        self.ersetze("lebenslauf/lebenslauf.yaml", "{quelle: proj-deploy-tool}",
+                     '{quelle: proj-deploy-tool, text: "Deployment-Werkzeug für **Kubernetes**", umformuliert: true}')
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertNotIn("2-mal fett", aus)
 
     def test_taetigkeit_beim_falschen_arbeitgeber(self):
         self.ersetze("lebenslauf/lebenslauf.yaml", "{quelle: taet-migrationen}", "{quelle: taet-terraform}")

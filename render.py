@@ -788,7 +788,7 @@ def pruefe_fett(sd: Stammdaten, ll: dict, ort: str, b: Befunde) -> None:
     """Gleicht das Fett in Profil, Tätigkeiten und Projekten mit der Liste 'fett' ab (Treffer der Stellenausschreibung).
 
     Fehler: ein Begriff der Liste ist nirgends fett, oder etwas ist fett, das nicht in der Liste steht.
-    Warnung: ein Begriff ist innerhalb eines Bereichs (Profil bzw. Erfahrung und Projekte) mehrmals fett.
+    Warnung: ein Begriff ist innerhalb eines Bereichs (Profil, Berufserfahrung, Projekte) mehrmals fett.
     Ohne Feld 'fett' (Standardlebensläufe, ältere Bewerbungen) wird nichts geprüft.
     """
     liste = ll.get("fett")
@@ -809,8 +809,8 @@ def pruefe_fett(sd: Stammdaten, ll: dict, ort: str, b: Befunde) -> None:
 
     taetigkeiten = [t for e in ll.get("berufserfahrung") or [] if isinstance(e, dict)
                     for t in e.get("taetigkeiten") or []]
-    bereiche = {"im Profil": [ll.get("profil")],
-                "in Erfahrung und Projekten": taetigkeiten + list(ll.get("projekte") or [])}
+    bereiche = {"im Profil": [ll.get("profil")], "in der Berufserfahrung": taetigkeiten,
+                "in den Projekten": list(ll.get("projekte") or [])}
     gefunden: set[str] = set()
     for bereich, aussagen in bereiche.items():
         anzahl: dict[str, int] = {}
