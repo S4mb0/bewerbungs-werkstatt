@@ -119,6 +119,28 @@ class Einrichten(unittest.TestCase):
         log = einrichten.befehl("git", "log", "--format=%s", cwd=d).stdout
         self.assertEqual(log.splitlines()[0], "Sicherung vor Migration")
 
+    @unittest.skipUnless(shutil.which("git"), "git fehlt")
+    def test_daten_anlegen(self):
+        shutil.rmtree(einrichten.DATEN)
+        ok, aus = still(einrichten.daten_anlegen, "Test Person", "lokal@bewerbungs-werkstatt")
+        self.assertTrue(ok, aus)
+        d = einrichten.DATEN
+        self.assertTrue((d / ".git").exists())
+        self.assertEqual(migrationen.lies_version(d), migrationen.SCHEMAVERSION)
+        self.assertTrue((d / "stammdaten" / "offen.md").exists())
+        self.assertEqual(einrichten.befehl("git", "log", "--format=%s", cwd=d).stdout.strip(), "Daten-Repo angelegt")
+        self.assertEqual(einrichten.befehl("git", "config", "user.email", cwd=d).stdout.strip(),
+                         "lokal@bewerbungs-werkstatt")
+        # erneut aufrufen: nichts wird überschrieben, kein neuer Commit
+        (d / "einstellungen.yaml").write_text(
+            (d / "einstellungen.yaml").read_text(encoding="utf-8").replace("klassisch", "kopfband"), encoding="utf-8")
+        einrichten.befehl("git", "commit", "-qam", "eigenes Template", cwd=d)
+        ok, aus = still(einrichten.daten_anlegen)
+        self.assertTrue(ok, aus)
+        self.assertIn("kopfband", (d / "einstellungen.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(einrichten.befehl("git", "log", "--format=%s", cwd=d).stdout.splitlines(),
+                         ["eigenes Template", "Daten-Repo angelegt"])
+
     def test_hinweise_fuer_alle_systeme(self):
         for system in einrichten.HINWEISE.values():
             self.assertEqual(set(system), {"python", "git", "chrome", "venv"})
