@@ -1,0 +1,10 @@
+# BEISPIEL – Kategorien der Skills, in der Reihenfolge, in der sie unter „Kenntnisse“ erscheinen.
+# gesprochene-sprache und arbeitsweise haben eine feste Bedeutung und müssen vorhanden sein;
+# alle anderen legt jeder Nutzer passend zu seinem Beruf an.
+kategorien:
+  - {id: programmiersprache, name: Programmiersprachen}
+  - {id: embedded-elektronik, name: Embedded & Elektronik}
+  - {id: cloud-betrieb, name: Cloud & Betrieb}
+  - {id: werkzeug-os, name: Tools & Systeme}
+  - {id: arbeitsweise, name: Arbeitsweise}
+  - {id: gesprochene-sprache, name: Sprachen}

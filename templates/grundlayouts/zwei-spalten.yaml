@@ -1,0 +1,7 @@
+# Grundlayout „zwei-spalten“ – welche Parameter ein Template hier setzen darf.
+beschreibung: Hauptspalte mit Name, Profil und Werdegang, getönte Seitenleiste mit Foto, Kontakt, Kenntnissen und Sprachen. Modern; im HTML steht die Hauptspalte zuerst, damit ATS die Reihenfolge richtig lesen.
+# Hier bestimmt die Fotoposition, auf welcher Seite die Seitenleiste steht.
+foto_positionen: [links, rechts]
+spalten:
+  haupt: [berufserfahrung, ausbildung, projekte]
+  seite: [kenntnisse]

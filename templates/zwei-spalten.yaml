@@ -1,0 +1,10 @@
+# Template „zwei-spalten“: Seitenleiste links in hellem Petrol.
+beschreibung: Zwei Spalten mit getönter Seitenleiste links, Petrol, Schrift Source Sans 3.
+grundlayout: zwei-spalten
+farbe: "#1d5c63"
+schrift: source-sans-3
+foto:
+  form: eckig
+  position: links
+ueberschriften: linie
+reihenfolge: [berufserfahrung, ausbildung, kenntnisse, projekte]

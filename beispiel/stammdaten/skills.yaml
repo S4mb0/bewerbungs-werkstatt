@@ -1,0 +1,18 @@
+# BEISPIEL – Niveau: Grundlagen / gut / sehr gut (gesprochene Sprachen: frei, z. B. Muttersprache).
+# Kategorien: programmiersprache, embedded-elektronik, cloud-betrieb, werkzeug-os, arbeitsweise, gesprochene-sprache
+skills:
+  - {id: skill-python, name: Python, kategorie: programmiersprache, niveau: gut, schwerpunkte: [devops, softwareentwicklung]}
+  - {id: skill-java, name: Java, kategorie: programmiersprache, niveau: sehr gut, schwerpunkte: [softwareentwicklung]}
+  - {id: skill-bash, name: Bash, kategorie: programmiersprache, niveau: sehr gut, schwerpunkte: [devops, it-administration]}
+  - {id: skill-c, name: C, kategorie: programmiersprache, niveau: gut, schwerpunkte: [embedded]}
+  - {id: skill-kubernetes, name: Kubernetes, kategorie: cloud-betrieb, niveau: sehr gut, schwerpunkte: [devops]}
+  - {id: skill-terraform, name: Terraform, kategorie: cloud-betrieb, niveau: gut, schwerpunkte: [devops]}
+  - {id: skill-monitoring, name: "Prometheus · Grafana", kategorie: cloud-betrieb, niveau: gut, schwerpunkte: [devops]}
+  - {id: skill-gitlab-ci, name: GitLab CI/CD, kategorie: werkzeug-os, niveau: sehr gut, schwerpunkte: [devops]}
+  - {id: skill-linux, name: Linux, kategorie: werkzeug-os, niveau: sehr gut, schwerpunkte: [devops, it-administration]}
+  - {id: skill-virtualisierung, name: Virtualisierung, kategorie: werkzeug-os, niveau: gut, schwerpunkte: [it-administration]}
+  - {id: skill-mikrocontroller, name: Mikrocontroller, kategorie: embedded-elektronik, niveau: Grundlagen, schwerpunkte: [embedded]}
+  - {id: skill-scrum, name: Scrum, kategorie: arbeitsweise, niveau: gut}
+  - {id: skill-teamfaehigkeit, name: Teamfähigkeit, kategorie: arbeitsweise, niveau: gut}   # absichtlich ohne Beleg
+  - {id: sprache-deutsch, name: Deutsch, kategorie: gesprochene-sprache, niveau: Muttersprache}
+  - {id: sprache-englisch, name: Englisch, kategorie: gesprochene-sprache, niveau: fließend}

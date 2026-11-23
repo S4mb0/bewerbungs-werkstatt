@@ -1,0 +1,41 @@
+# BEISPIEL-Lebenslauf (Schwerpunkt devops) auf Basis von beispiel/stammdaten.
+# Aufruf: python render.py --daten beispiel beispiel/standard/devops
+#
+# Jede Aussage: {quelle: <ID>, text, umformuliert}
+#   - ohne text: Kernaussage aus den Stammdaten
+#   - text ohne umformuliert: muss Kernaussage oder freigegebene Formulierung sein
+#   - umformuliert: true: eigener Text, nur mit Fakten aus der Quelle
+schwerpunkt: devops
+untertitel: DevOps Engineer · Cloud & Infrastruktur · Softwareentwicklung
+profil:
+  quelle: profil-devops
+schalter:
+  foto: true
+  positionen: zusammengefasst      # oder: einzeln
+berufserfahrung:
+  - arbeitgeber: beispiel-technik
+    taetigkeiten:
+      - {quelle: taet-k8s-betrieb, text: "Verantwortlich für den Betrieb von Microservices auf **Kubernetes**"}
+      - {quelle: taet-pipelines}
+      - {quelle: taet-terraform}
+      - {quelle: taet-monitoring, text: "Monitoring, Logging und Fehleranalyse verteilter Systeme mit **Prometheus und Grafana**", umformuliert: true}
+      - {quelle: taet-lasttests}
+      - {quelle: taet-java-dienste}
+  - arbeitgeber: muster-systemhaus
+    taetigkeiten:
+      - {quelle: taet-server-betrieb}
+      - {quelle: taet-migrationen}
+      - {quelle: taet-skripte}
+kenntnisse:
+  - skill-kubernetes
+  - skill-terraform
+  - skill-monitoring
+  - skill-gitlab-ci
+  - skill-linux
+  - skill-bash
+  - skill-python
+  - skill-java
+  - skill-scrum
+projekte:
+  - {quelle: proj-deploy-tool}
+  - {quelle: proj-videoaufnahme}

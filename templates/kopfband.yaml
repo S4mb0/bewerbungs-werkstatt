@@ -1,0 +1,10 @@
+# Template „kopfband“: dunkelblaues Band oben, rundes Foto.
+beschreibung: Farbiges Kopfband in Nachtblau mit rundem Foto rechts, Schrift Inter, Überschriften mit Balken.
+grundlayout: kopfband
+farbe: "#22344f"
+schrift: inter
+foto:
+  form: rund
+  position: rechts
+ueberschriften: balken
+reihenfolge: [berufserfahrung, ausbildung, kenntnisse, projekte]

@@ -1,0 +1,15 @@
+# Persönliche Daten: eigenes Git-Repo, gehört nie ins System-Repo
+daten/
+# Arbeitsordner
+entwurf/
+vorschau/
+# Lokale Python-Umgebung
+.venv/
+__pycache__/
+# Lock- und Swap-Dateien
+.~lock.*
+~$*
+*.swp
+# Erzeugte Dateien der Beispieldaten
+beispiel/**/lebenslauf.pdf
+beispiel/**/lebenslauf.html
