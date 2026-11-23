@@ -50,10 +50,10 @@ Durchgesetzt von `render.py --pruefen` (Konstanten `STAMMDATEN_DATEIEN` und folg
 |---|---|---|
 | `person.yaml` | ein Objekt | **id**, **name**, **wohnort**, telefon, email, web (Liste), geburtsdatum, geburtsort, foto (Pfad relativ zu `daten/stammdaten/`) |
 | `berufserfahrung.yaml` | `arbeitgeber:` | Arbeitgeber: **id**, **name**, ort, **positionen** |
-| | | Position: **id**, **art** (`Praktikum`, `Werkstudent`, `Ausbildung`, `Festanstellung`), **titel**, **von**, **bis**, taetigkeiten, anlage |
+| | | Position: **id**, **art** (`Festanstellung`, `Teilzeit`, `Ausbildung`, `Praktikum`, `Werkstudent`, `Minijob`, `Freiberuflich`, `Selbstständig`, `Ehrenamt`), **titel**, **von**, **bis**, taetigkeiten, anlage |
 | | | Tätigkeit: **id**, **kernaussage**, **details**, formulierungen, **schwerpunkte**, skills |
-| `ausbildung.yaml` | `abschluesse:` | Abschluss: **id**, **art** (`schule`, `ausbildung`, `studium`, `zertifikat`), **bezeichnung** (offiziell laut Nachweis), **institution**, von, bis, note, **status** (`abgeschlossen`, `laufend`), thema, anlage, position, skills |
-| `projekte.yaml` | `projekte:` | Projekt: **id**, **titel**, **kontext** (`privat`, `studium`, `beruflich`), position, von, bis, **kernaussage**, **details**, formulierungen, repos, **schwerpunkte**, skills |
+| `ausbildung.yaml` | `abschluesse:` | Abschluss: **id**, **art** (`schule`, `ausbildung`, `studium`, `weiterbildung`, `zertifikat`), **bezeichnung** (offiziell laut Nachweis), **institution**, von, bis, note, **status** (`abgeschlossen`, `laufend`), thema, anlage, position, skills |
+| `projekte.yaml` | `projekte:` | Projekt: **id**, **titel**, **kontext** (`privat`, `studium`, `beruflich`, `ehrenamt`), position, von, bis, **kernaussage**, **details**, formulierungen, repos, **schwerpunkte**, skills |
 | `skills.yaml` | `skills:` | Skill: **id**, **name**, **kategorie** (eine ID aus `kategorien.yaml`), **niveau** (freier Text; vereinbart sind `Grundlagen`, `gut`, `sehr gut`, bei gesprochenen Sprachen frei), schwerpunkte |
 | `profil.yaml` | `schwerpunkte:` | Schwerpunkt: **id**, **profiltext** (Objekt mit **id** und **text**) |
 | `kategorien.yaml` | `kategorien:` | Kategorie: **id**, **name** (Überschrift unter „Kenntnisse“). Reihenfolge = Reihenfolge im Lebenslauf. Pflicht sind `gesprochene-sprache` (steht immer im Lebenslauf) und `arbeitsweise` (nur mit Beleg). |

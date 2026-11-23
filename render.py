@@ -111,13 +111,16 @@ class Befunde:
 #   "idliste", "strliste", ("enum", {…}), ("liste", schema), ("objekt", schema), ("aussage",)
 AUSSAGE = ("aussage",)
 
+POSITIONSARTEN = {"Festanstellung", "Teilzeit", "Ausbildung", "Praktikum", "Werkstudent", "Minijob",
+                  "Freiberuflich", "Selbstständig", "Ehrenamt"}
+
 TAETIGKEIT = {
     "id": ("id", True), "kernaussage": ("str", True), "details": ("str", True),
     "formulierungen": ("strliste", False), "schwerpunkte": ("idliste", True),
     "skills": ("idliste", False), "veraltet": ("bool", False),
 }
 POSITION = {
-    "id": ("id", True), "art": (("enum", {"Praktikum", "Werkstudent", "Ausbildung", "Festanstellung"}), True),
+    "id": ("id", True), "art": (("enum", POSITIONSARTEN), True),
     "titel": ("str", True), "von": ("monat", True), "bis": ("bis", True),
     "taetigkeiten": (("liste", TAETIGKEIT), False), "anlage": ("str", False), "veraltet": ("bool", False),
 }
@@ -126,7 +129,7 @@ ARBEITGEBER = {
     "positionen": (("liste", POSITION), True), "veraltet": ("bool", False),
 }
 ABSCHLUSS = {
-    "id": ("id", True), "art": (("enum", {"schule", "ausbildung", "studium", "zertifikat"}), True),
+    "id": ("id", True), "art": (("enum", {"schule", "ausbildung", "studium", "weiterbildung", "zertifikat"}), True),
     "bezeichnung": ("str", True), "institution": ("str", True),
     "von": ("monat", False), "bis": ("monat", False), "note": ("text", False),
     "status": (("enum", {"abgeschlossen", "laufend"}), True), "thema": ("str", False),
@@ -135,7 +138,7 @@ ABSCHLUSS = {
 }
 PROJEKT = {
     "id": ("id", True), "titel": ("str", True),
-    "kontext": (("enum", {"privat", "studium", "beruflich"}), True), "position": ("id", False),
+    "kontext": (("enum", {"privat", "studium", "beruflich", "ehrenamt"}), True), "position": ("id", False),
     "von": ("monat", False), "bis": ("bis", False), "kernaussage": ("str", True),
     "details": ("str", True), "formulierungen": ("strliste", False), "repos": ("strliste", False),
     "schwerpunkte": ("idliste", True), "skills": ("idliste", False), "veraltet": ("bool", False),

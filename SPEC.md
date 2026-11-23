@@ -24,6 +24,8 @@ Feste Regeln:
 | `templates/schriften/` | Schriften mit freier Lizenz (SIL OFL) |
 | `beispiel/` | vollständige Beispieldaten (erfundene Person), für Tests und Vorschaubilder |
 | `tests/` | Tests für `render.py` |
+| `einrichten.py`, `migrationen.py`, `umgebung.py` | Umgebung einrichten, Daten anlegen, migrieren, aktualisieren |
+| `.claude/skills/einrichten/` | Skill: Ersteinrichtung – Daten-Repo, Person und Foto, Import, Schwerpunkte, Template, Standardlebensläufe |
 | `.claude/skills/stammdaten-pflegen/` | Skill: Stammdaten erfassen, ändern, Schwerpunkte anlegen |
 | `.claude/skills/lebenslauf-anpassen/` | Skill: Stellenausschreibung → Bewerbung |
 | `.claude/skills/template-pflegen/` | Skill: eigene Templates anlegen, ändern, veralten lassen; Standard-Template wählen |
@@ -131,7 +133,14 @@ Regeln:
 - `einrichten.py` läuft mit dem System-Python ohne Zusatzpakete: ohne Argument prüft es Python ≥ 3.10, git und einen Browser, legt `.venv` an und installiert die Pakete. Was auf Systemebene fehlt, installiert es nicht, sondern nennt den Befehl für Windows, macOS oder Linux. `--migrieren` sichert `daten/` (Commit im Daten-Repo, sonst Kopie `daten-sicherung-<zeit>/`), migriert und prüft. `--aktualisieren` holt das System per `git pull --ff-only` (nur, wenn im System nichts geändert ist), aktualisiert die Pakete und migriert.
 - `CHROME` (Pfad) und `CHROME_ARGS` (z. B. `--no-sandbox` in Containern) passen den Browseraufruf an.
 - CI (GitHub Actions) führt `einrichten.py`, das Rendern der Beispieldaten und alle Tests auf Windows, macOS und Linux aus.
-- *In Arbeit:* Skill `einrichten`.
+- `einrichten.py --daten-anlegen` legt `daten/` als lokales Git-Repo mit leerem Gerüst an (`einstellungen.yaml` mit aktueller Schemaversion, `offen.md`, `LIESMICH.md`) und setzt bei Bedarf Name und E-Mail für Git nur dort.
+
+## 9. Einrichten
+
+- Der Skill `einrichten` führt einen neuen Nutzer in dieser Reihenfolge: Umgebung (`einrichten.py`), Daten-Repo (lokal oder zusätzlich privates GitHub-Repo, Sichtbarkeit geprüft), Person und Foto, Import des bisherigen Lebenslaufs und weiterer Nachweise (sonst Interview), Nachfragen, Schwerpunkte und Kategorien, Template, Standardlebensläufe.
+- Aus Dokumenten Gelesenes ist ein Vorschlag, bis der Nutzer es bestätigt. Unklares kommt nach `offen.md`, nicht in die Stammdaten.
+- Die Einrichtung lässt sich abbrechen und an der Stelle fortsetzen, die die vorhandenen Dateien zeigen.
+- Das Schema deckt auch Berufe außerhalb der IT ab: Positionsarten u. a. Teilzeit, Minijob, Freiberuflich, Selbstständig, Ehrenamt; Abschlüsse auch als Weiterbildung; Projekte auch im Ehrenamt; Kategorien frei.
 
 ## Nicht Teil dieser Spezifikation
 
