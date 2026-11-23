@@ -1,0 +1,9 @@
+# BEISPIEL – erfundene Platzhalter-Person, keine echten Daten.
+id: person
+name: Max Mustermann
+wohnort: Musterstadt
+telefon: "+49 000 0000000"
+email: max.mustermann@example.org
+web:
+  - github.com/beispiel
+foto: foto.svg   # relativ zu diesem Ordner

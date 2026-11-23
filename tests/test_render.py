@@ -24,6 +24,7 @@ class KaputteDaten(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="render-test-"))
         shutil.copytree(BEISPIEL / "stammdaten", self.tmp / "stammdaten")
+        shutil.copy(BEISPIEL / "einstellungen.yaml", self.tmp / "einstellungen.yaml")
         shutil.copytree(BEISPIEL / "standard" / "devops", self.tmp / "lebenslauf",
                         ignore=shutil.ignore_patterns("*.pdf", "*.html"))
 
@@ -178,7 +179,7 @@ class Templates(unittest.TestCase):
         shutil.copytree(BEISPIEL / "stammdaten", self.tmp / "stammdaten")
         shutil.copytree(BEISPIEL / "standard" / "devops", self.tmp / "lebenslauf",
                         ignore=shutil.ignore_patterns("*.pdf", "*.html"))
-        (self.tmp / "einstellungen.yaml").write_text("template: klassisch\n", encoding="utf-8")
+        self.schreibe("einstellungen.yaml", "template: klassisch\n")
         self.alt = {k: getattr(render, k) for k in
                     ("TEMPLATE_ORDNER", "GRUNDLAYOUT_ORDNER", "SCHRIFTEN_ORDNER", "DATEN")}
         self.sys = self.tmp / "system" / "templates"
@@ -192,6 +193,8 @@ class Templates(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def schreibe(self, datei: str, text: str):
+        if datei == "einstellungen.yaml":
+            text = f"schemaversion: {render.SCHEMAVERSION}\n" + text
         (self.tmp / datei).write_text(text, encoding="utf-8")
 
     def variante(self, name: str, ersetzungen: dict[str, str]):

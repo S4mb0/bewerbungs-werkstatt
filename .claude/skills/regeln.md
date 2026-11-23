@@ -89,6 +89,8 @@ Sag dem Nutzer danach in einem Satz, dass die venv neu angelegt wurde. Scheitert
 
 Fehlt `daten/stammdaten/`, ist noch nichts eingerichtet: Verweise auf den Skill `einrichten`.
 
+Meldet `render.py` „zuerst migrieren“, ist das System neuer als die Daten. Sag dem Nutzer in einem Satz, dass `python einrichten.py --migrieren` die Daten umstellt und vorher eine Sicherung anlegt, und führ es nach seinem OK aus. Meldet es „System aktualisieren“, ist es umgekehrt: `python einrichten.py --aktualisieren`, ebenfalls nach OK. Fehlen Python-Pakete oder die `.venv`, hilft `python einrichten.py`.
+
 ## Nach jeder Änderung
 
 Nach jeder Änderung an `daten/stammdaten/`, `daten/standard/`, `entwurf/`, `templates/` oder `daten/einstellungen.yaml` läuft aus dem Repo-Wurzelordner:

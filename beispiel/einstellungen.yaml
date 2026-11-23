@@ -1,0 +1,3 @@
+# BEISPIEL – Einstellungen der Beispielperson.
+schemaversion: 1  # nicht von Hand ändern, siehe einrichten.py --migrieren
+template: klassisch

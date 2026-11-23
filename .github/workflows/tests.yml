@@ -1,0 +1,49 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      # Chrome braucht auf den Linux-Runnern (AppArmor) --no-sandbox
+      CHROME_ARGS: ${{ runner.os == 'Linux' && '--no-sandbox' || '' }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Umgebung einrichten (einrichten.py)
+        run: python einrichten.py
+
+      - name: Beispieldaten prüfen und rendern
+        run: |
+          python render.py --daten beispiel --pruefen
+          python render.py --daten beispiel beispiel/standard/devops
+          python render.py --daten beispiel --vorschau zwei-spalten
+
+      - name: Tests
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=.venv/Scripts/python; else PY=.venv/bin/python; fi
+          "$PY" -m unittest discover -s tests -v
+
+      - name: PDFs aufheben
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-${{ matrix.os }}
+          path: |
+            beispiel/standard/devops/lebenslauf.pdf
+            vorschau/**/lebenslauf.pdf
+          if-no-files-found: ignore

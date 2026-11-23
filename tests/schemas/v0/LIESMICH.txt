@@ -1,0 +1,2 @@
+# Daten im Schema 0 (vor kategorien.yaml und schemaversion), für den Migrationstest.
+# Nicht ändern: Diese Dateien stehen für den alten Stand.
