@@ -9,7 +9,7 @@ schwerpunkte:
       id: profil-devops
       text: >-
         DevOps-orientierter Softwareentwickler mit mehreren Jahren Erfahrung im Betrieb von Containerplattformen
-        in der Cloud. Fundament aus einer Ausbildung in der Systemintegration, ergänzt durch ein Informatikstudium.
+        in der Cloud. Fundament aus einer Ausbildung in der Anwendungsentwicklung, ergänzt durch ein Informatikstudium.
         Schwerpunkte: **CI/CD**, Infrastruktur als Code, Monitoring und Automatisierung mit Bash und Python.
   - id: softwareentwicklung
     profiltext:

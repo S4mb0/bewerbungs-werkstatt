@@ -4,30 +4,30 @@ abschluesse:
     art: zertifikat
     bezeichnung: Beispiel Cloud Zertifikat – Associate
     institution: Beispiel-Zertifizierungsstelle
-    bis: "2024-03"
+    bis: "2022-06"
     status: abgeschlossen
     skills: [skill-kubernetes]
   - id: abschluss-bsc
     art: studium
     bezeichnung: Bachelor of Science Informatik
     institution: Hochschule Musterstadt
-    von: "2019-10"
-    bis: "2023-07"
+    von: "2017-10"
+    bis: "2020-09"
     note: "2,0"
     status: abgeschlossen
     thema: Platzhalter-Thema der Abschlussarbeit
-  - id: abschluss-beng
+  - id: abschluss-msc
     art: studium
-    bezeichnung: B.Eng. Elektrotechnik
-    institution: Hochschule Musterstadt
-    von: "2025-10"
+    bezeichnung: M.Sc. Wirtschaftsinformatik (berufsbegleitend)
+    institution: Fernhochschule Beispielland
+    von: "2024-04"
     status: laufend
-  - id: abschluss-fisi
+  - id: abschluss-fiae
     art: ausbildung
-    bezeichnung: Fachinformatiker Systemintegration (IHK)
+    bezeichnung: Fachinformatiker Anwendungsentwicklung (IHK)
     institution: Muster Systemhaus AG / IHK Musterland
-    von: "2016-09"
-    bis: "2019-05"
+    von: "2012-08"
+    bis: "2015-01"
     note: gut
     status: abgeschlossen
     position: muster-ausbildung
