@@ -5,6 +5,7 @@ Läuft mit dem System-Python, ohne Zusatzpakete (macOS/Linux: `python3` statt `p
     python einrichten.py                 # Umgebung prüfen, .venv anlegen und Pakete installieren
     python einrichten.py --migrieren     # daten/ auf die aktuelle Schemaversion bringen (mit Sicherung)
     python einrichten.py --aktualisieren # System per git pull holen, Pakete, Migrationen, Prüfung
+    python einrichten.py --update-pruefen # nur nachsehen, ob es ein Update gibt (git fetch, ändert nichts)
 
 Programme auf Systemebene (Python, git, Chrome) installiert das Skript nicht selbst, es nennt den Befehl.
 
@@ -262,11 +263,46 @@ def aktualisieren() -> bool:
     return subprocess.run([sys.executable, str(REPO / "einrichten.py"), "--migrieren"], cwd=REPO).returncode == 0
 
 
+UPDATE_TIMEOUT = 15  # Sekunden für git fetch; ohne Netz soll die Prüfung den Start nicht aufhalten
+
+
+def update_pruefen() -> bool:
+    """Schaut nach, ob es ein Update gibt, ohne etwas zu ändern (nur git fetch).
+
+    Gibt immer True zurück: Ohne Git-Klon, Upstream oder Netz wird die Prüfung mit einem Hinweis übersprungen.
+    """
+    if not (REPO / ".git").exists():
+        print("UPDATE   übersprungen: kein Git-Klon")
+        return True
+    if befehl("git", "rev-parse", "--abbrev-ref", "@{u}", cwd=REPO).returncode != 0:
+        print("UPDATE   übersprungen: kein Upstream-Branch")
+        return True
+    try:
+        erg = subprocess.run(["git", "fetch", "-q"], cwd=REPO, capture_output=True, text=True,
+                             encoding="utf-8", errors="replace", timeout=UPDATE_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        print("UPDATE   übersprungen: keine Antwort vom Server")
+        return True
+    if erg.returncode != 0:
+        grund = (erg.stderr.strip().splitlines() or ["?"])[-1]
+        print(f"UPDATE   übersprungen: git fetch fehlgeschlagen ({grund})")
+        return True
+    neu = befehl("git", "log", "--oneline", "--no-merges", "HEAD..@{u}", cwd=REPO).stdout.strip()
+    if neu:
+        print(f"UPDATE   verfügbar ({len(neu.splitlines())} Änderungen) – holen mit: "
+              f"python einrichten.py --aktualisieren\n{neu}")
+    else:
+        print("UPDATE   System ist aktuell")
+    return True
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Umgebung prüfen und einrichten, Daten migrieren, System aktualisieren.")
     gruppe = ap.add_mutually_exclusive_group()
     gruppe.add_argument("--migrieren", action="store_true", help="daten/ auf die aktuelle Schemaversion bringen")
     gruppe.add_argument("--aktualisieren", action="store_true", help="System per git pull aktualisieren, dann migrieren")
+    gruppe.add_argument("--update-pruefen", action="store_true",
+                        help="nur nachsehen, ob es ein Update gibt (git fetch, ändert nichts)")
     gruppe.add_argument("--daten-anlegen", action="store_true",
                         help="daten/ als eigenes, lokales Git-Repo mit leerem Gerüst anlegen")
     ap.add_argument("--git-name", help="mit --daten-anlegen: Git-Name nur für daten/ (sonst der globale)")
@@ -277,6 +313,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if migrieren() else 1
     if args.aktualisieren:
         return 0 if aktualisieren() else 1
+    if args.update_pruefen:
+        return 0 if update_pruefen() else 1
     if args.daten_anlegen:
         return 0 if daten_anlegen(args.git_name, args.git_email) else 1
     ok = pruefe_umgebung()

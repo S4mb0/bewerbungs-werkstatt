@@ -7,7 +7,7 @@ description: Passt den Lebenslauf des Nutzers an eine Stellenausschreibung an un
 
 Aus einer **Stellenausschreibung** wird ein **Entwurf** in `entwurf/` und nach Freigabe durch den Nutzer eine **Bewerbung** in `daten/bewerbungen/`. Ziel: höchstens 15 Minuten von der Anzeige bis zur Freigabe, Gegenlesen eingeschlossen.
 
-Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jede Aussage, jede Lücke und jeden Commit in diesem Ablauf. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner.
+Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jede Aussage, jede Lücke und jeden Commit in diesem Ablauf. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner. Zuerst die Update-Prüfung aus `regeln.md` (Abschnitt „Umgebung“), einmal pro Gespräch.
 
 ## 1. Start
 

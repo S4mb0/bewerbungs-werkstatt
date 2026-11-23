@@ -10,7 +10,7 @@ Der Nutzer erzählt frei, du machst daraus Einträge in `daten/stammdaten/*.yaml
 - **A. Erfassen und ändern**: neue Einträge, Ergänzungen, Korrekturen, `veraltet`
 - **B. Neuer Schwerpunkt**: nur, wenn der Nutzer ihn ausdrücklich will oder `lebenslauf-anpassen` angehalten hat, weil kein Schwerpunkt passt
 
-Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jeden Eintrag, jede ID und jeden Commit. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner.
+Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für jeden Eintrag, jede ID und jeden Commit. Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner. Zuerst die Update-Prüfung aus `regeln.md` (Abschnitt „Umgebung“), einmal pro Gespräch.
 
 `daten/stammdaten/offen.md` sammelt, was der Nutzer nachreichen will, und die Lücken aus Stellenausschreibungen. Lies sie mit: Erledigt die Erzählung des Nutzers einen Punkt, streichst du ihn im selben Commit. Was er gerade nicht weiß, trägst du dort ein, statt es zu raten.
 

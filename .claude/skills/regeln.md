@@ -91,6 +91,14 @@ Fehlt `daten/stammdaten/`, ist noch nichts eingerichtet: Verweise auf den Skill 
 
 Meldet `render.py` „zuerst migrieren“, ist das System neuer als die Daten. Sag dem Nutzer in einem Satz, dass `python einrichten.py --migrieren` die Daten umstellt und vorher eine Sicherung anlegt, und führ es nach seinem OK aus. Meldet es „System aktualisieren“, ist es umgekehrt: `python einrichten.py --aktualisieren`, ebenfalls nach OK. Fehlen Python-Pakete oder die `.venv`, hilft `python einrichten.py`.
 
+### Update-Prüfung
+
+Einmal pro Gespräch, vor dem ersten Schritt eines Skills: `python einrichten.py --update-pruefen`. Es schaut nur nach (git fetch) und ändert nichts.
+
+- `UPDATE   verfügbar (…)`: Sag dem Nutzer in einem Satz, dass es ein Update gibt, nenn die wichtigsten Änderungen aus der Liste in Stichworten und frag, ob du es holen sollst. Nach OK `python einrichten.py --aktualisieren`, danach liest du den Skill und `regeln.md` neu, weil sie sich geändert haben können. Ohne OK machst du mit dem jetzigen Stand weiter.
+- `UPDATE   System ist aktuell` oder `UPDATE   übersprungen: …`: Nichts sagen, weitermachen.
+- Meldet `--aktualisieren` „geänderte Dateien im System“, hat der Nutzer selbst etwas am System geändert. Nenn die Dateien und mach ohne Update weiter. Zurücksetzen oder überschreiben nur, wenn er es ausdrücklich sagt.
+
 ## Nach jeder Änderung
 
 Nach jeder Änderung an `daten/stammdaten/`, `daten/standard/`, `entwurf/`, `templates/` oder `daten/einstellungen.yaml` läuft aus dem Repo-Wurzelordner:

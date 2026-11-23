@@ -12,7 +12,7 @@ Ein **Template** ist eine kleine YAML-Datei: ein **Grundlayout** plus Parameter.
 - **C. Standard-Template wechseln**: `daten/einstellungen.yaml`
 - **D. Template veralten lassen**: statt löschen
 
-Dieser Skill ist bewusst allgemein gehalten: Er nennt keine Person und liest Name, Foto und Kontakt nur über `render.py` aus den Stammdaten. Für Commits, Umgebung (`.venv`) und Sprache gilt [`../regeln.md`](../regeln.md). Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner.
+Dieser Skill ist bewusst allgemein gehalten: Er nennt keine Person und liest Name, Foto und Kontakt nur über `render.py` aus den Stammdaten. Für Commits, Umgebung (`.venv`) und Sprache gilt [`../regeln.md`](../regeln.md). Begriffe: `GLOSSARY.md`. Alle Befehle laufen im Repo-Wurzelordner. Zuerst die Update-Prüfung aus `regeln.md` (Abschnitt „Umgebung“), einmal pro Gespräch.
 
 ## Was es gibt
 

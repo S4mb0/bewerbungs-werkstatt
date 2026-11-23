@@ -132,6 +132,8 @@ Das holt die neue Version des Systems (`git pull`) und aktualisiert die Python-P
 
 Meldet `render.py` „zuerst migrieren“, genügt `python einrichten.py --migrieren`.
 
+Du musst nicht selbst daran denken: Zu Beginn jedes Skills schaut Claude mit `python einrichten.py --update-pruefen` nach, ob es ein Update gibt, und fragt dich, bevor es etwas holt. Ohne Netz wird die Prüfung still übersprungen.
+
 ## Mitentwickeln
 
 - Tests: `python -m unittest discover -s tests` mit dem Python der `.venv` (`.venv/Scripts/python` bzw. `.venv/bin/python`). Die CI führt sie bei jedem PR auf Windows, macOS und Linux aus.
