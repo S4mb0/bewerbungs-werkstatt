@@ -38,22 +38,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent
+import umgebung
+from migrationen import SCHEMAVERSION, lies_version
 
-
-def venv_python() -> Path:
-    return REPO / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-
-
-def in_venv_neu_starten() -> None:
-    """Läuft das Skript nicht in der .venv des Repos, aber es gibt sie: dort neu starten."""
-    ziel = venv_python()
-    if ziel.exists() and Path(sys.prefix).resolve() != (REPO / ".venv").resolve():
-        sys.exit(subprocess.run([str(ziel), str(Path(__file__).resolve()), *sys.argv[1:]]).returncode)
-
+REPO = umgebung.REPO
 
 if __name__ == "__main__":
-    in_venv_neu_starten()
+    umgebung.in_venv_neu_starten(__file__)
 
 import jinja2
 import markupsafe
@@ -81,26 +72,7 @@ def eigene_templates() -> Path:
 STANDARD_TEMPLATE = "klassisch"                      # gilt, wenn weder Lebenslauf noch Einstellungen eins nennen
 MAX_SEITEN = 2
 
-def chrome_kandidaten() -> list[str]:
-    """Chrome, Edge oder Chromium auf Windows, macOS und Linux; CHROME (Umgebungsvariable) zuerst."""
-    lokal = os.environ.get("LOCALAPPDATA", "")
-    pfade = [
-        os.environ.get("CHROME", ""),
-        "C:/Program Files/Google/Chrome/Application/chrome.exe",
-        "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-        f"{lokal}/Google/Chrome/Application/chrome.exe" if lokal else "",
-        "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-        "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-        "/Applications/Chromium.app/Contents/MacOS/Chromium",
-        "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-    ]
-    for name in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge", "chrome"):
-        pfade.append(shutil.which(name) or "")
-    return [p for p in pfade if p]
-
-
-CHROME_KANDIDATEN = chrome_kandidaten()
+CHROME_KANDIDATEN = umgebung.chrome_kandidaten()
 
 # Kategorien mit fester Bedeutung; alle übrigen legt der Nutzer in stammdaten/kategorien.yaml an.
 SPRACHE = "gesprochene-sprache"   # steht immer im Lebenslauf
@@ -236,7 +208,7 @@ SCHRIFT_SCHEMA = {
         "stil": (("enum", {"normal", "italic"}), True),
     }), False),
 }
-EINSTELLUNGEN_SCHEMA = {"template": ("id", False)}
+EINSTELLUNGEN_SCHEMA = {"schemaversion": ("zahl", False), "template": ("id", False)}
 FARB_MUSTER = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
@@ -299,6 +271,9 @@ def pruefe_wert(wert, typ, ort: str, b: Befunde) -> None:
     elif typ == "text":
         if not isinstance(wert, (str, int, float)):
             b.fehler_(ort, f"erwartet einen Text, gefunden: {kurz(wert)}")
+    elif typ == "zahl":
+        if not isinstance(wert, int) or isinstance(wert, bool) or wert < 0:
+            b.fehler_(ort, f"erwartet eine ganze Zahl ≥ 0, gefunden: {kurz(wert)}")
     elif typ == "farbe":
         if not isinstance(wert, str) or not FARB_MUSTER.match(wert):
             b.fehler_(ort, f"ungültige Farbe {kurz(wert)} (erwartet #rrggbb, in Anführungszeichen)")
@@ -913,6 +888,11 @@ def rendere_html(kontext: dict, grundlayout: str, stil: dict) -> str:
 
 # --------------------------------------------------------------------------- PDF
 
+def chrome_zusatz() -> list[str]:
+    """Zusätzliche Chrome-Argumente aus der Umgebungsvariable CHROME_ARGS, z. B. --no-sandbox in Containern."""
+    return os.environ.get("CHROME_ARGS", "").split()
+
+
 def finde_chrome() -> str:
     for kandidat in CHROME_KANDIDATEN:
         if kandidat and Path(kandidat).exists():
@@ -928,7 +908,7 @@ def drucke_pdf(html: str, ziel: Path) -> None:
         html_pfad.write_text(html, encoding="utf-8")
         pdf_tmp = tmp / "lebenslauf.pdf"
         befehl = [
-            finde_chrome(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
+            finde_chrome(), *chrome_zusatz(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
             f"--user-data-dir={tmp / 'profil'}", "--no-pdf-header-footer",
             f"--print-to-pdf={pdf_tmp}", html_pfad.as_uri(),
         ]
@@ -960,7 +940,7 @@ def miss_spalten(html: str) -> dict[str, float]:
         html_pfad = tmp / "messen.html"
         html_pfad.write_text(html.replace("</body>", MESS_SKRIPT + "</body>"), encoding="utf-8")
         befehl = [
-            finde_chrome(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
+            finde_chrome(), *chrome_zusatz(), "--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
             f"--user-data-dir={tmp / 'profil'}", "--window-size=1000,1400", "--virtual-time-budget=5000",
             "--dump-dom", html_pfad.as_uri(),
         ]
@@ -1047,6 +1027,15 @@ def main(argv: list[str] | None = None) -> int:
     if not stammdaten_ordner().is_dir():
         print(f"FEHLER   {rel(stammdaten_ordner())} fehlt – noch nicht eingerichtet? Den Skill „einrichten“ verwenden "
               f"oder mit --daten beispiel die Beispieldaten nehmen.")
+        return 1
+    version = lies_version(DATEN)
+    if version < SCHEMAVERSION:
+        print(f"FEHLER   {rel(DATEN)} hat Schema {version}, das System erwartet {SCHEMAVERSION} – "
+              f"zuerst migrieren: python einrichten.py --migrieren")
+        return 1
+    if version > SCHEMAVERSION:
+        print(f"FEHLER   {rel(DATEN)} hat Schema {version}, dieses System kennt nur bis {SCHEMAVERSION} – "
+              f"System aktualisieren: python einrichten.py --aktualisieren")
         return 1
 
     b = Befunde()

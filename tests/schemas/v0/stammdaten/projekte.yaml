@@ -1,0 +1,26 @@
+# BEISPIEL – erfundene Projekte.
+projekte:
+  - id: proj-messstation
+    titel: Messstation mit Mikrocontroller
+    kontext: privat
+    von: "2022-03"
+    kernaussage: Temperatur- und Feuchtemessung in **C** mit Übertragung per Funk
+    details: Platzhalter.
+    repos: [github.com/beispiel/messstation]
+    schwerpunkte: [embedded]
+    skills: [skill-c, skill-mikrocontroller]
+  - id: proj-videoaufnahme
+    titel: Linux-Automatisierung auf dem Einplatinenrechner
+    kontext: privat
+    kernaussage: automatisierte Aufzeichnung mit Kommandozeilen-Tool, Encoding und Dateiverwaltung in **Python**
+    details: Platzhalter.
+    schwerpunkte: [devops, softwareentwicklung]
+    skills: [skill-python, skill-linux]
+  - id: proj-deploy-tool
+    titel: Interner Deployment-Helfer
+    kontext: beruflich
+    position: beispiel-technik-festanstellung
+    kernaussage: Kommandozeilen-Werkzeug zur Vereinheitlichung von Deployments über mehrere Umgebungen
+    details: Platzhalter.
+    schwerpunkte: [devops]
+    skills: [skill-bash]

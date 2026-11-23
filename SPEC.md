@@ -127,7 +127,11 @@ Regeln:
 - Der Nutzer klont das öffentliche System-Repo. `daten/` ist dort gitignoriert und wird beim Einrichten ein eigenes, lokales Git-Repo; ein privates Remote ist optional.
 - Updates holt ein `git pull` im System. Weil System und Daten getrennt sind, gibt es dabei keine Konflikte.
 - `daten/einstellungen.yaml` trägt eine `schemaversion`. `render.py` bricht ab, wenn die Daten älter (→ migrieren) oder neuer (→ System aktualisieren) sind. Jede Änderung, die die Datenstruktur bricht, bringt eine Migration mit; neue optionale Felder brauchen keine.
-- *In Arbeit:* `einrichten.py` (Umgebung prüfen, `--migrieren`, `--aktualisieren`), Skill `einrichten`, CI auf drei Plattformen.
+- Migrationen stehen in `migrationen.py` (nur Standardbibliothek, textbasiert, damit Kommentare bleiben). Für jede alte Version liegen Altdaten unter `tests/schemas/v<N>/`; ein Test migriert sie und prüft sie mit `render.py`. Fehlt eine Migration oder ihre Altdaten, schlägt er fehl.
+- `einrichten.py` läuft mit dem System-Python ohne Zusatzpakete: ohne Argument prüft es Python ≥ 3.10, git und einen Browser, legt `.venv` an und installiert die Pakete. Was auf Systemebene fehlt, installiert es nicht, sondern nennt den Befehl für Windows, macOS oder Linux. `--migrieren` sichert `daten/` (Commit im Daten-Repo, sonst Kopie `daten-sicherung-<zeit>/`), migriert und prüft. `--aktualisieren` holt das System per `git pull --ff-only` (nur, wenn im System nichts geändert ist), aktualisiert die Pakete und migriert.
+- `CHROME` (Pfad) und `CHROME_ARGS` (z. B. `--no-sandbox` in Containern) passen den Browseraufruf an.
+- CI (GitHub Actions) führt `einrichten.py`, das Rendern der Beispieldaten und alle Tests auf Windows, macOS und Linux aus.
+- *In Arbeit:* Skill `einrichten`.
 
 ## Nicht Teil dieser Spezifikation
 
