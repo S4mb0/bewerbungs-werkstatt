@@ -35,7 +35,7 @@ Jede Einheit hat eine feste, lesbare ID: Kleinbuchstaben, Ziffern und Bindestric
 | Position | `<arbeitgeber>-<art>` | `beispiel-technik-werkstudent` |
 | Tätigkeit | `taet-<thema>` | `taet-k8s-betrieb` |
 | Projekt | `proj-<thema>` | `proj-deploy-tool` |
-| Abschluss | `abschluss-<kurz>` | `abschluss-fisi` |
+| Abschluss | `abschluss-<kurz>` | `abschluss-bsc` |
 | Skill | `skill-<name>` | `skill-kubernetes` |
 | Schwerpunkt | Name | `devops` |
 | Profiltext | `profil-<schwerpunkt>` | `profil-devops` |

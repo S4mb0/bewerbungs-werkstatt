@@ -7,7 +7,7 @@ arbeitgeber:
       - id: beispiel-technik-festanstellung
         art: Festanstellung
         titel: Software-Entwickler / DevOps
-        von: "2023-09"
+        von: "2020-10"
         bis: heute
         taetigkeiten:
           - id: taet-k8s-betrieb
@@ -40,8 +40,8 @@ arbeitgeber:
       - id: beispiel-technik-werkstudent
         art: Werkstudent
         titel: Werkstudent Softwareentwicklung
-        von: "2022-01"
-        bis: "2023-08"
+        von: "2018-04"
+        bis: "2020-09"
         taetigkeiten:
           - id: taet-java-dienste
             kernaussage: Entwicklung und Wartung von Backend-Diensten in **Java**
@@ -51,8 +51,8 @@ arbeitgeber:
       - id: beispiel-technik-praktikum
         art: Praktikum
         titel: Praktikant
-        von: "2021-08"
-        bis: "2021-12"
+        von: "2017-09"
+        bis: "2018-03"
         taetigkeiten:
           - id: taet-scrum
             kernaussage: Mitarbeit in einem Scrum-Team
@@ -65,9 +65,9 @@ arbeitgeber:
     positionen:
       - id: muster-festanstellung
         art: Festanstellung
-        titel: IT-Systemtechniker
-        von: "2019-06"
-        bis: "2020-04"
+        titel: Anwendungsentwickler
+        von: "2015-02"
+        bis: "2017-08"
         taetigkeiten:
           - id: taet-server-betrieb
             kernaussage: Betrieb und Administration von Server- und Client-Infrastrukturen
@@ -81,9 +81,9 @@ arbeitgeber:
             skills: [skill-virtualisierung]
       - id: muster-ausbildung
         art: Ausbildung
-        titel: Auszubildender Fachinformatiker Systemintegration
-        von: "2016-09"
-        bis: "2019-05"
+        titel: Auszubildender Fachinformatiker Anwendungsentwicklung
+        von: "2012-08"
+        bis: "2015-01"
         taetigkeiten:
           - id: taet-skripte
             kernaussage: Automatisierung wiederkehrender Administrationsaufgaben mit **Bash**

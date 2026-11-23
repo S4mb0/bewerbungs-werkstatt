@@ -9,10 +9,10 @@ projekte:
     repos: [github.com/beispiel/messstation]
     schwerpunkte: [embedded]
     skills: [skill-c, skill-mikrocontroller]
-  - id: proj-videoaufnahme
-    titel: Linux-Automatisierung auf dem Einplatinenrechner
+  - id: proj-hausautomation
+    titel: Hausautomation mit Home Assistant
     kontext: privat
-    kernaussage: automatisierte Aufzeichnung mit Kommandozeilen-Tool, Encoding und Dateiverwaltung in **Python**
+    kernaussage: eigene Integrationen und Automatisierungen in **Python** auf einem Heimserver unter Linux
     details: Platzhalter.
     schwerpunkte: [devops, softwareentwicklung]
     skills: [skill-python, skill-linux]

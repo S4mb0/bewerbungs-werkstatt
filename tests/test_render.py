@@ -114,13 +114,13 @@ class KaputteDaten(unittest.TestCase):
         self.erwarte_fehler("unbekannte ID 'skill-cobol'")
 
     def test_ungueltiges_datum(self):
-        self.ersetze("stammdaten/berufserfahrung.yaml", 'von: "2022-01"', 'von: "01/2022"')
-        self.erwarte_fehler("ungültiges Datum '01/2022'")
+        self.ersetze("stammdaten/berufserfahrung.yaml", 'von: "2018-04"', 'von: "04/2018"')
+        self.erwarte_fehler("ungültiges Datum '04/2018'")
 
     def test_position_mit_anlage(self):
         # Eine Position darf auf ein Arbeitszeugnis verweisen; fehlt die Datei, gibt es nur eine Warnung.
-        self.ersetze("stammdaten/berufserfahrung.yaml", '        bis: "2020-04"\n',
-                     '        bis: "2020-04"\n        anlage: anlagen/gibts-nicht.pdf\n')
+        self.ersetze("stammdaten/berufserfahrung.yaml", '        bis: "2017-08"\n',
+                     '        bis: "2017-08"\n        anlage: anlagen/gibts-nicht.pdf\n')
         code, aus = self.pruefen()
         self.assertEqual(code, 0, aus)
         self.assertIn("Position 'muster-festanstellung': Anlage 'anlagen/gibts-nicht.pdf' nicht gefunden", aus)
@@ -140,7 +140,7 @@ class Kontext(unittest.TestCase):
         kontext = render.baue_kontext(sd, ll)
         # laufende zuerst, dann nach Enddatum absteigend, unabhängig von der Reihenfolge in ausbildung.yaml
         self.assertEqual([a["quelle"] for a in kontext["abschluesse"]],
-                         ["abschluss-beng", "abschluss-zertifikat-cloud", "abschluss-bsc", "abschluss-fisi"])
+                         ["abschluss-msc", "abschluss-zertifikat-cloud", "abschluss-bsc", "abschluss-fiae"])
 
 
 class Rendern(unittest.TestCase):
