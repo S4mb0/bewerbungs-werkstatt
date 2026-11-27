@@ -1,0 +1,26 @@
+# BEISPIEL – Bausteine und Rahmendaten fürs Anschreiben (optionale Datei).
+#
+# bausteine: freigegebene Absätze, die in Anschreiben wiederkehren. Erlaubte Arten: einstieg, motivation, rahmen,
+#   schluss. Einen Baustein „hauptteil“ gibt es nicht: Aussagen über die eigene Erfahrung zitieren Tätigkeiten,
+#   Projekte und Abschlüsse; gelungene Sätze dazu kommen dort unter `formulierungen`.
+# rahmen: Verfügbarkeit und Gehaltsvorstellung. Stehen nur im Anschreiben, wenn die Stellenausschreibung danach fragt.
+#   Ein Absatz zitiert sie mit der festen ID `rahmen`.
+bausteine:
+  - id: baust-einstieg-betrieb
+    art: einstieg
+    text: >-
+      seit mehreren Jahren sorge ich dafür, dass Software nicht nur entsteht, sondern zuverlässig läuft – von der
+      Pipeline bis zum Betrieb in der Cloud.
+    schwerpunkte: [devops]
+  - id: baust-motivation-produkt
+    art: motivation
+    text: >-
+      Mich reizt an Ihrer Stelle besonders, Verantwortung für eine Plattform zu übernehmen, die andere Teams täglich
+      nutzen, und sie Schritt für Schritt robuster und einfacher zu machen.
+  - id: baust-schluss-gespraech
+    art: schluss
+    text: >-
+      Ich freue mich darauf, Sie in einem persönlichen Gespräch davon zu überzeugen, dass ich gut zu Ihrem Team passe.
+rahmen:
+  verfuegbarkeit: drei Monate Kündigungsfrist zum Monatsende
+  gehalt: 65.000 € brutto im Jahr

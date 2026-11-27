@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" width="220" height="60">
+  <!-- BEISPIEL – erfundene Platzhalter-Unterschrift -->
+  <path d="M8 44 C 18 10, 26 10, 28 40 C 30 18, 40 12, 44 40 C 48 26, 56 24, 60 38 C 66 30, 72 30, 76 38
+           M 84 40 C 92 20, 104 20, 100 38 C 98 46, 110 30, 118 36 C 126 42, 132 26, 140 34 C 150 44, 160 28, 172 34
+           C 182 40, 196 30, 212 26"
+        fill="none" stroke="#1b2a49" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

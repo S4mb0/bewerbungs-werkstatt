@@ -10,7 +10,7 @@ Diese Regeln gelten in `einrichten`, `stammdaten-pflegen`, `lebenslauf-anpassen`
 
 ## Faktentreue
 
-Die **Stammdaten** sind die einzige Quelle. Jede Aussage in einem Lebenslauf ist durch eine Kernaussage, Details oder eine freigegebene Formulierung in den Stammdaten **gedeckt**.
+Die **Stammdaten** sind die einzige Quelle. Jede Aussage in einem Lebenslauf ist durch eine Kernaussage, Details oder eine freigegebene Formulierung in den Stammdaten **gedeckt**. Für das Anschreiben gilt dasselbe für jede Aussage über den Nutzer; was dort darüber hinaus steht, regelt der Abschnitt „Anschreiben“.
 
 - Umformulieren ist erlaubt, auch mit Begriffen aus der Stellenausschreibung. Die Fakten bleiben dieselben: Technologien, Zahlen, Verantwortungen und Ergebnisse stammen aus Kernaussage und Details derselben Quelle.
 - Jede Aussage in `lebenslauf.yaml` hat die Form `{quelle: <ID>, text, umformuliert}`:
@@ -39,16 +39,18 @@ Jede Einheit hat eine feste, lesbare ID: Kleinbuchstaben, Ziffern und Bindestric
 | Skill | `skill-<name>` | `skill-kubernetes` |
 | Schwerpunkt | Name | `devops` |
 | Profiltext | `profil-<schwerpunkt>` | `profil-devops` |
+| Baustein (Anschreiben) | `baust-<thema>` | `baust-schluss-gespraech` |
+| Rahmendaten (Anschreiben) | fest `rahmen` | `rahmen` |
 
 Eine vergebene ID ist **dauerhaft**: Sie bleibt, auch wenn sich Text, Titel oder Zuordnung ändern, denn Standardlebensläufe und versendete Bewerbungen zitieren sie. Ein überholter Eintrag bekommt `veraltet: true` und bleibt stehen. `render.py` warnt, wenn ein Lebenslauf etwas Veraltetes zitiert.
 
 ## Schema der Stammdaten
 
-Durchgesetzt von `render.py --pruefen` (Konstanten `STAMMDATEN_DATEIEN` und folgende in `render.py`; bei Abweichung gilt `render.py`). Unbekannte Felder sind Fehler. **Fett** = Pflichtfeld. Jede Einheit außer Person, Schwerpunkt und Profiltext kennt `veraltet` (true/false).
+Durchgesetzt von `render.py --pruefen` (Konstanten `STAMMDATEN_DATEIEN` und folgende in `render.py`; bei Abweichung gilt `render.py`). Unbekannte Felder sind Fehler. **Fett** = Pflichtfeld. Jede Einheit außer Person, Schwerpunkt, Profiltext und Rahmen kennt `veraltet` (true/false).
 
 | Datei | Wurzel | Einheit und Felder |
 |---|---|---|
-| `person.yaml` | ein Objekt | **id**, **name**, **wohnort**, telefon, email, web (Liste), geburtsdatum, geburtsort, foto (Pfad relativ zu `daten/stammdaten/`) |
+| `person.yaml` | ein Objekt | **id**, **name**, **wohnort**, strasse, plz, telefon, email, web (Liste), geburtsdatum, geburtsort, foto und unterschrift (Pfade relativ zu `daten/stammdaten/`). `strasse`, `plz` und `unterschrift` erscheinen nur im Anschreiben. |
 | `berufserfahrung.yaml` | `arbeitgeber:` | Arbeitgeber: **id**, **name**, ort, **positionen** |
 | | | Position: **id**, **art** (`Festanstellung`, `Teilzeit`, `Ausbildung`, `Praktikum`, `Werkstudent`, `Minijob`, `Freiberuflich`, `Selbstständig`, `Ehrenamt`), **titel**, **von**, **bis**, taetigkeiten, anlage |
 | | | Tätigkeit: **id**, **kernaussage**, **details**, formulierungen, **schwerpunkte**, skills |
@@ -57,6 +59,7 @@ Durchgesetzt von `render.py --pruefen` (Konstanten `STAMMDATEN_DATEIEN` und folg
 | `skills.yaml` | `skills:` | Skill: **id**, **name**, **kategorie** (eine ID aus `kategorien.yaml`), **niveau** (freier Text; vereinbart sind `Grundlagen`, `gut`, `sehr gut`, bei gesprochenen Sprachen frei), schwerpunkte |
 | `profil.yaml` | `schwerpunkte:` | Schwerpunkt: **id**, **profiltext** (Objekt mit **id** und **text**) |
 | `kategorien.yaml` | `kategorien:` | Kategorie: **id**, **name** (Überschrift unter „Kenntnisse“). Reihenfolge = Reihenfolge im Lebenslauf. Pflicht sind `gesprochene-sprache` (steht immer im Lebenslauf) und `arbeitsweise` (nur mit Beleg). |
+| `anschreiben.yaml` (optional) | `bausteine:`, `rahmen:` | Baustein: **id**, **art** (`einstieg`, `motivation`, `rahmen`, `schluss`), **text**, schwerpunkte. Rahmen: verfuegbarkeit, gehalt (freier Text). |
 
 Zusätzliche Regeln:
 
@@ -69,9 +72,25 @@ Zusätzliche Regeln:
 
 **Belege** sind die `skills`-Verweise von Tätigkeiten, Projekten und Abschlüssen. Wer einen Skill erfasst, hängt ihn an mindestens eine Tätigkeit, ein Projekt oder einen Abschluss.
 
+## Anschreiben
+
+Ein **Anschreiben** ist optional und gehört zu einer Bewerbung oder als **Standardanschreiben** zu einem Schwerpunkt: `anschreiben.yaml` (+ PDF) liegt neben `lebenslauf.yaml` und nimmt immer dessen Template. Es hat genau 1 Seite, etwa 250–350 Wörter und kein Fett.
+
+Es besteht aus **Absätzen** `{art, text, quellen, herkunft, umformuliert}`:
+
+- `art`: `einstieg`, `hauptteil`, `motivation`, `rahmen` oder `schluss`.
+- `quellen`: IDs aus den Stammdaten (Tätigkeit, Projekt, Abschluss, Position, Skill, Profiltext, Baustein, `rahmen`). Jede Aussage über den Nutzer ist durch sie gedeckt, wie im Lebenslauf.
+- `herkunft`: `anzeige` (Bezug auf Firma und Stelle aus der Stellenausschreibung) oder `nutzer` (was der Nutzer im Chat gesagt hat, etwa seine Motivation). Erfundene Gründe gibt es nicht.
+- Jeder Absatz hat `quellen` oder `herkunft`, ein `hauptteil` immer `quellen`.
+- Ohne `text` zeigt der Absatz den freigegebenen Text seiner einzigen Quelle (meist ein Baustein). Ein `text`, der von den freigegebenen Texten seiner Quellen abweicht, trägt `umformuliert: true`.
+
+**Bausteine** (`daten/stammdaten/anschreiben.yaml`) sind freigegebene Absätze ohne Bezug auf eine bestimmte Firma: Einstiege, Motivationen, Schlüsse. Einen Baustein für den Hauptteil gibt es nicht: Erfahrung steht in Tätigkeiten und Projekten, gelungene Sätze dazu werden deren `formulierungen`. **Rahmendaten** (`rahmen`: Verfügbarkeit, Gehalt) erscheinen nur, wenn die Stellenausschreibung danach fragt.
+
+Empfänger, Stelle, Kennziffer und Anrede stehen in `bewerbung.yaml` (`empfaenger:` mit abteilung, ansprechperson, strasse, plz, ort, anrede), nicht in den Stammdaten. Ohne `bewerbung.yaml` (Standardanschreiben) zeigt `render.py` Platzhalter wie `[Firma]`; in einer Bewerbung sind Platzhalter ein Fehler. Das Datum des Briefs ist das `datum` aus `bewerbung.yaml`, solange es ein Platzhalter ist, der heutige Tag.
+
 ## Schwerpunkte
 
-Welche Schwerpunkte es gibt, steht nur in `daten/stammdaten/profil.yaml`; jeder Nutzer legt seine eigenen an, mindestens einen. Jeder hat dort einen Profiltext und unter `daten/standard/<schwerpunkt>/` seinen Standardlebenslauf. Tätigkeiten und Projekte tragen mindestens einen, Skills optional welche.
+Welche Schwerpunkte es gibt, steht nur in `daten/stammdaten/profil.yaml`; jeder Nutzer legt seine eigenen an, mindestens einen. Jeder hat dort einen Profiltext und unter `daten/standard/<schwerpunkt>/` seinen Standardlebenslauf, auf Wunsch auch ein Standardanschreiben. Tätigkeiten und Projekte tragen mindestens einen, Skills optional welche.
 
 Ein neuer Schwerpunkt entsteht nur **bewusst**: Der Nutzer bestätigt Name, Profiltext und Zuordnungen ausdrücklich, und der neue Standardlebenslauf wird von ihm freigegeben. Passt eine Stellenausschreibung zu keinem Schwerpunkt, gilt das als Anlass zu fragen.
 
@@ -109,7 +128,7 @@ python render.py --pruefen
 
 Die Änderung ist fertig, wenn die Prüfung mit Exit-Code 0 endet und jede Warnung entweder behoben oder dem Nutzer genannt ist. Fehler werden in den Daten behoben, nie durch Abschwächen von `render.py`.
 
-Ändern sich Stammdaten, die ein Standardlebenslauf zitiert, schlägt der Skill vor, ihn nachzuziehen. Der Nutzer entscheidet.
+Ändern sich Stammdaten, die ein Standardlebenslauf oder Standardanschreiben zitiert, schlägt der Skill vor, sie nachzuziehen. Der Nutzer entscheidet.
 
 ## Commits
 
@@ -128,4 +147,4 @@ Originaldokumente (alte Lebensläufe, ungeschwärzte Zeugnisse) bleiben, wo der 
 
 ## Sprache
 
-Alles ist Deutsch: Lebensläufe, Rückfragen, Commit-Nachrichten, YAML-Kommentare. Verwende die Begriffe aus `GLOSSARY.md` (Tätigkeit, Position, Beleg, Lücke, Entwurf …) und meide die dort unter _Avoid_ genannten.
+Alles ist Deutsch: Lebensläufe, Anschreiben, Rückfragen, Commit-Nachrichten, YAML-Kommentare. Verwende die Begriffe aus `GLOSSARY.md` (Tätigkeit, Position, Beleg, Lücke, Entwurf …) und meide die dort unter _Avoid_ genannten.

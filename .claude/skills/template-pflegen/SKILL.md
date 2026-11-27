@@ -68,10 +68,10 @@ Der Nutzer bestätigt oder korrigiert. Neu zeigen musst du nur, was er geändert
    python render.py --vorschau <name>
    ```
 
-   Das rendert jeden `daten/standard/<schwerpunkt>/` nach `vorschau/<schwerpunkt>/lebenslauf.pdf`. `lebenslauf.yaml` und PDF im Standard bleiben unberührt. Die letzten Zeilen (`VORSCHAU …`) fassen Seitenzahl und Ergebnis zusammen, darüber stehen die Warnungen je Lebenslauf.
+   Das rendert jeden `daten/standard/<schwerpunkt>/` nach `vorschau/<schwerpunkt>/lebenslauf.pdf` und, wo es ein Standardanschreiben gibt, nach `vorschau/<schwerpunkt>/anschreiben.pdf`: Das Anschreiben-Gegenstück des Grundlayouts übernimmt Farbe, Schrift und Überschriften. YAML und PDFs im Standard bleiben unberührt. Die letzten Zeilen (`VORSCHAU …`) fassen Seitenzahl und Ergebnis zusammen, darüber stehen die Warnungen je Lebenslauf.
 4. Sieh dir jedes Vorschau-PDF mit dem Read-Tool an: Überlappungen, abgeschnittene Bilder, Lesbarkeit der Farben, Umbrüche.
 
-Fertig, wenn alle Zeilen `VORSCHAU …` „in Ordnung“ sagen und du die PDFs gesehen hast. Sagt eine Zeile „FEHLER“, zum Beispiel mehr als 2 Seiten, passt das Template nicht zu den Standardlebensläufen. Schlag eine Änderung am Template vor (andere Schrift oder Reihenfolge). Gekürzt wird hier nicht, Inhalte gehören zu `lebenslauf-anpassen`.
+Fertig, wenn alle Zeilen `VORSCHAU …` „in Ordnung“ sagen und du die PDFs gesehen hast. Sagt eine Zeile „FEHLER“, zum Beispiel mehr als 2 Seiten beim Lebenslauf oder mehr als 1 Seite beim Anschreiben, passt das Template nicht zu den Standardlebensläufen. Schlag eine Änderung am Template vor (andere Schrift oder Reihenfolge). Gekürzt wird hier nicht, Inhalte gehören zu `lebenslauf-anpassen`.
 
 ### 3. Zeigen
 
@@ -100,7 +100,7 @@ Fertig, wenn der Commit steht. `vorschau/` ist gitignoriert und darf liegen blei
 1. Zeig nur die geänderten Zeilen, alt und neu. Bei einer neuen Farbe gibst du den Hex-Wert an.
 2. Nach dem OK schreiben, `--pruefen`, `--vorschau <name>`, PDFs ansehen, zeigen wie in A, Schritte 2 und 3.
 3. **Wer ist betroffen?**
-   - Standardlebensläufe mit `template: <name>`, sowie alle ohne Feld `template`, wenn `<name>` in `daten/einstellungen.yaml` steht. Diese rendest du nach der Freigabe neu (`render.py daten/standard/<schwerpunkt>`), damit ihr eingechecktes PDF zum Template passt.
+   - Standardlebensläufe mit `template: <name>`, sowie alle ohne Feld `template`, wenn `<name>` in `daten/einstellungen.yaml` steht. Diese rendest du nach der Freigabe neu (`render.py daten/standard/<schwerpunkt>`, das rendert ein Standardanschreiben mit), damit ihre eingecheckten PDFs zum Template passen.
    - Abgelegte Bewerbungen (`grep -l "template: <name>" daten/bewerbungen/*/lebenslauf.yaml`) bleiben unverändert, ihr PDF ist eingefroren. Nenne ihre Zahl in einem Satz, damit der Nutzer weiß, dass ein neues Rendern dort anders aussähe. Soll das alte Aussehen erhalten bleiben, schlag stattdessen ein neues Template vor (A) und lass das alte stehen.
 4. Commit im Daten-Repo: `Template <name>: <was sich ändert>`, mit den neu gerenderten Standards.
 

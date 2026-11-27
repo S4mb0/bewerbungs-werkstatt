@@ -1,4 +1,4 @@
-"""Lebenslauf rendern und Stammdaten prüfen.
+"""Lebenslauf und Anschreiben rendern und Stammdaten prüfen.
 
 Einrichtung der lokalen .venv (einmalig je Checkout, sie ist gitignoriert):
 
@@ -9,15 +9,20 @@ Aufrufe aus dem Repo-Wurzelordner. Gibt es eine .venv, startet sich das Skript s
 `python render.py …` (macOS/Linux: `python3 render.py …`) genügt also:
 
     python render.py <ordner>            # <ordner>/lebenslauf.yaml -> <ordner>/lebenslauf.pdf
+                                         # und, falls vorhanden, anschreiben.yaml -> anschreiben.pdf
+    python render.py --nur-anschreiben <ordner>  # nur das Anschreiben neu (z. B. bei der Freigabe wegen des Datums)
     python render.py --pruefen [ordner…]  # nur prüfen: Schema, IDs, Verweise
-    python render.py --vorschau <template> [ordner…]  # Standardlebensläufe mit Template nach vorschau/
+    python render.py --vorschau <template> [ordner…]  # Standardlebensläufe (und -anschreiben) mit Template nach vorschau/
+
+Ein Anschreiben nutzt immer das Template des Lebenslaufs im selben Ordner. Empfänger, Stelle und Datum liest es
+aus bewerbung.yaml im selben Ordner; ohne bewerbung.yaml (Standardanschreiben) stehen dort Platzhalter.
 
 Die persönlichen Daten liegen in daten/ (eigenes Git-Repo, hier gitignoriert): stammdaten/, standard/,
 bewerbungen/, anlagen/, templates/ (eigene Templates) und einstellungen.yaml. Mit --daten lässt sich ein
 anderer Daten-Ordner wählen (z. B. beispiel).
 
-Ohne Ordner prüft --pruefen die Stammdaten sowie daten/standard/*/lebenslauf.yaml und
-entwurf/lebenslauf.yaml, falls vorhanden.
+Ohne Ordner prüft --pruefen die Stammdaten sowie daten/standard/*/ und entwurf/ (lebenslauf.yaml und, falls
+vorhanden, anschreiben.yaml).
 
 Das Aussehen bestimmt ein Template (<name>.yaml = Grundlayout + Parameter, mitgeliefert in templates/,
 eigene in daten/templates/). Welches: Feld `template` in lebenslauf.yaml, sonst `template` in
@@ -36,6 +41,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 import umgebung
@@ -151,9 +157,22 @@ PROFILTEXT = {"id": ("id", True), "text": ("str", True)}
 SCHWERPUNKT = {"id": ("id", True), "profiltext": (("objekt", PROFILTEXT), True)}
 PERSON = {
     "id": ("id", True), "name": ("str", True), "wohnort": ("str", True),
+    "strasse": ("str", False), "plz": ("text", False),          # nur fürs Anschreiben (Absender)
     "telefon": ("str", False), "email": ("str", False), "web": ("strliste", False),
     "geburtsdatum": ("str", False), "geburtsort": ("str", False), "foto": ("str", False),
+    "unterschrift": ("str", False),                               # Bild, relativ zu stammdaten/, nur fürs Anschreiben
 }
+
+# Anschreiben: Absätze mit einer Art. Bausteine (freigegebene Absätze in stammdaten/anschreiben.yaml) gibt es für
+# alle Arten außer „hauptteil“: Aussagen über die eigene Erfahrung zitieren Tätigkeiten, Projekte und Abschlüsse.
+ABSATZARTEN = {"einstieg", "hauptteil", "motivation", "rahmen", "schluss"}
+BAUSTEIN = {
+    "id": ("id", True), "art": (("enum", ABSATZARTEN - {"hauptteil"}), True), "text": ("str", True),
+    "schwerpunkte": ("idliste", False), "veraltet": ("bool", False),
+}
+RAHMEN = {"verfuegbarkeit": ("str", False), "gehalt": ("str", False)}
+ANSCHREIBEN_STAMMDATEN = {"bausteine": (("liste", BAUSTEIN), False), "rahmen": (("objekt", RAHMEN), False)}
+RAHMEN_ID = "rahmen"   # feste ID der Rahmendaten (Verfügbarkeit, Gehalt) als Quelle eines Absatzes
 
 KATEGORIE = {"id": ("id", True), "name": ("str", True)}
 
@@ -184,6 +203,27 @@ LEBENSLAUF = {
 }
 AUSSAGE_SCHEMA = {"quelle": ("id", True), "text": ("str", False), "umformuliert": ("bool", False)}
 
+ABSATZ = {
+    "art": (("enum", ABSATZARTEN), True), "text": ("str", False), "quellen": ("idliste", False),
+    "herkunft": (("enum", {"anzeige", "nutzer"}), False), "umformuliert": ("bool", False),
+}
+ANSCHREIBEN = {
+    "betreff": ("str", False),   # ersetzt „Bewerbung als <Stelle>“
+    "schalter": (("objekt", {"unterschrift": ("bool", False)}), False),
+    "absaetze": (("liste", ABSATZ), True),
+}
+BEWERBUNG = {
+    "firma": ("str", True), "stelle": ("str", True), "datum": ("tag", False), "schwerpunkt": ("id", False),
+    "status": ("str", False), "kennziffer": ("text", False),
+    "empfaenger": (("objekt", {
+        "abteilung": ("str", False), "ansprechperson": ("str", False), "strasse": ("str", False),
+        "plz": ("text", False), "ort": ("str", False), "anrede": ("str", False),
+    }), False),
+}
+# Quellen, die ein Absatz zitieren darf
+ABSATZ_QUELLEN = {"taetigkeit", "projekt", "abschluss", "position", "skill", "profiltext", "baustein", "rahmen"}
+ANSCHREIBEN_WOERTER = (200, 400)   # außerhalb: Hinweis (Ziel 250–350)
+
 # Templates, Grundlayouts, Schriften, Einstellungen
 ABSCHNITTE = ["berufserfahrung", "ausbildung", "kenntnisse", "projekte"]
 TEMPLATE_SCHEMA = {
@@ -212,7 +252,10 @@ SCHRIFT_SCHEMA = {
         "stil": (("enum", {"normal", "italic"}), True),
     }), False),
 }
-EINSTELLUNGEN_SCHEMA = {"schemaversion": ("zahl", False), "template": ("id", False)}
+EINSTELLUNGEN_SCHEMA = {
+    "schemaversion": ("zahl", False), "template": ("id", False),
+    "anschreiben": (("enum", {"nein"}), False),   # nein: einrichten fragt nicht mehr nach Anschreiben
+}
 FARB_MUSTER = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
@@ -275,6 +318,9 @@ def pruefe_wert(wert, typ, ort: str, b: Befunde) -> None:
     elif typ == "text":
         if not isinstance(wert, (str, int, float)):
             b.fehler_(ort, f"erwartet einen Text, gefunden: {kurz(wert)}")
+    elif typ == "tag":   # "JJJJ-MM-TT" oder ein Platzhalter wie "<JJJJ-MM-TT>" im Entwurf
+        if not isinstance(wert, (str, date)):
+            b.fehler_(ort, f"erwartet ein Datum JJJJ-MM-TT, gefunden: {kurz(wert)}")
     elif typ == "zahl":
         if not isinstance(wert, int) or isinstance(wert, bool) or wert < 0:
             b.fehler_(ort, f"erwartet eine ganze Zahl ≥ 0, gefunden: {kurz(wert)}")
@@ -328,6 +374,8 @@ class Stammdaten:
         self.skills: list[dict] = []
         self.schwerpunkte: list[dict] = []
         self.kategorien: list[dict] = []   # Reihenfolge = Reihenfolge unter „Kenntnisse“
+        self.bausteine: list[dict] = []    # aus der optionalen anschreiben.yaml
+        self.rahmen: dict = {}
         # ID -> (Art, Objekt, Eltern-ID)
         self.index: dict[str, tuple[str, dict, str | None]] = {}
 
@@ -387,9 +435,27 @@ def lade_stammdaten(ordner: Path, b: Befunde) -> Stammdaten:
         if isinstance(liste, list):
             setattr(sd, wurzel, [x for x in liste if isinstance(x, dict)])
 
+    lade_anschreiben_stammdaten(sd, b)
     baue_index(sd, b)
     pruefe_verweise(sd, b)
     return sd
+
+
+def lade_anschreiben_stammdaten(sd: Stammdaten, b: Befunde) -> None:
+    """Die optionale stammdaten/anschreiben.yaml: Bausteine und Rahmendaten. Fehlt sie, gibt es beides nicht."""
+    pfad = sd.ordner / "anschreiben.yaml"
+    if not pfad.exists():
+        return
+    daten = lade_yaml(pfad, b)
+    if daten is None:
+        return
+    pruefe_schema(daten, ANSCHREIBEN_STAMMDATEN, rel(pfad), b)
+    if not isinstance(daten, dict):
+        return
+    if isinstance(daten.get("bausteine"), list):
+        sd.bausteine = [x for x in daten["bausteine"] if isinstance(x, dict)]
+    if isinstance(daten.get("rahmen"), dict):
+        sd.rahmen = daten["rahmen"]
 
 
 def baue_index(sd: Stammdaten, b: Befunde) -> None:
@@ -422,6 +488,10 @@ def baue_index(sd: Stammdaten, b: Befunde) -> None:
         pt = sp.get("profiltext")
         if isinstance(pt, dict):
             neu(pt.get("id"), "profiltext", pt, sp.get("id"))
+    for bs in sd.bausteine:
+        neu(bs.get("id"), "baustein", bs)
+    if sd.rahmen:
+        neu(RAHMEN_ID, "rahmen", sd.rahmen)
 
 
 def verweis(sd: Stammdaten, id_, erwartet: str, ort: str, b: Befunde) -> bool:
@@ -478,9 +548,14 @@ def pruefe_verweise(sd: Stammdaten, b: Befunde) -> None:
                                                          f"(vorhanden: {', '.join(map(str, kategorien))})")
         for sp in s.get("schwerpunkte") or []:
             verweis(sd, sp, "schwerpunkt", f"Skill '{s.get('id')}'.schwerpunkte", b)
-    foto = sd.person.get("foto")
-    if foto and not (sd.ordner / foto).exists():
-        b.fehler_(rel(sd.ordner / "person.yaml"), f"Foto '{foto}' nicht gefunden (Pfad relativ zum Stammdaten-Ordner)")
+    for feld, name in (("foto", "Foto"), ("unterschrift", "Unterschrift")):
+        bild = sd.person.get(feld)
+        if isinstance(bild, str) and not (sd.ordner / bild).exists():
+            b.fehler_(rel(sd.ordner / "person.yaml"),
+                      f"{name} '{bild}' nicht gefunden (Pfad relativ zum Stammdaten-Ordner)")
+    for bs in sd.bausteine:
+        for sp in bs.get("schwerpunkte") or []:
+            verweis(sd, sp, "schwerpunkt", f"Baustein '{bs.get('id')}'.schwerpunkte", b)
     belegt = belegte_skills(sd)
     for s in sd.skills:
         if s.get("kategorie") == ARBEITSWEISE and s.get("id") not in belegt:
@@ -537,8 +612,9 @@ def lade_gestaltung(b: Befunde) -> Gestaltung:
         if daten is None:
             continue
         pruefe_schema(daten, GRUNDLAYOUT_SCHEMA, rel(meta), b)
-        if not (GRUNDLAYOUT_ORDNER / f"{meta.stem}.html.j2").exists():
-            b.fehler_(rel(meta), f"Grundlayout-Datei {meta.stem}.html.j2 fehlt")
+        for datei in (f"{meta.stem}.html.j2", f"{meta.stem}.anschreiben.html.j2"):
+            if not (GRUNDLAYOUT_ORDNER / datei).exists():
+                b.fehler_(rel(meta), f"Grundlayout-Datei {datei} fehlt")
         if isinstance(daten, dict):
             g.grundlayouts[meta.stem] = daten
 
@@ -833,6 +909,177 @@ def pruefe_fett(sd: Stammdaten, ll: dict, ort: str, b: Befunde) -> None:
                          "Projekt setzen oder aus der Liste nehmen")
 
 
+# --------------------------------------------------------------------------- Anschreiben
+
+PLATZHALTER_MUSTER = re.compile(r"\[[^\[\]\n]{1,40}\]")   # z. B. [Firma] im Standardanschreiben
+DATUM_MUSTER = re.compile(r"^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$")
+GENDER_MUSTER = re.compile(r"\s*\(\s*[a-z]{1,3}(\s*/\s*[a-z]{1,3}){1,3}\s*\)", re.IGNORECASE)   # (m/w/d) usw.
+MONATSNAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober",
+               "November", "Dezember"]
+
+
+def absatz_text(sd: Stammdaten, a: dict) -> str:
+    """Eigener Text des Absatzes, sonst der freigegebene Text seiner einzigen Quelle; immer ohne Fett."""
+    if a.get("text"):
+        return ohne_fett(a["text"])
+    quellen = a.get("quellen") or []
+    return ohne_fett(freigegebene_texte(sd.obj(quellen[0]))[0]) if quellen else ""
+
+
+def pruefe_anschreiben(sd: Stammdaten, ordner: Path, b: Befunde) -> dict | None:
+    """Prüft <ordner>/anschreiben.yaml (und bewerbung.yaml, falls vorhanden).
+
+    Jeder Absatz hat Quellen aus den Stammdaten oder eine Herkunft (anzeige, nutzer), ein Hauptteil immer Quellen.
+    Texte, die von den freigegebenen Texten ihrer Quellen abweichen, sind als umformuliert gekennzeichnet.
+    """
+    pfad = ordner / "anschreiben.yaml"
+    ort = rel(pfad)
+    an = lade_yaml(pfad, b)
+    if an is None:
+        return None
+    pruefe_schema(an, ANSCHREIBEN, ort, b)
+    if not isinstance(an, dict):
+        return None
+    if not (ordner / "lebenslauf.yaml").exists():
+        b.fehler_(ort, "im selben Ordner fehlt lebenslauf.yaml – das Anschreiben übernimmt dessen Template")
+
+    bew = None
+    bpfad = ordner / "bewerbung.yaml"
+    if bpfad.exists():
+        bew = lade_yaml(bpfad, b)
+        if bew is not None:
+            pruefe_schema(bew, BEWERBUNG, rel(bpfad), b)
+        if not isinstance(bew, dict):
+            bew = None
+
+    belegt = belegte_skills(sd)
+    texte = []
+    absaetze = an.get("absaetze") if isinstance(an.get("absaetze"), list) else []
+    for i, a in enumerate(absaetze):
+        o = f"{ort}.absaetze[{i}]"
+        if not isinstance(a, dict):
+            continue  # schon von der Schemaprüfung gemeldet
+        quellen = [q for q in a.get("quellen") or [] if isinstance(q, str)]
+        if not quellen and not a.get("herkunft"):
+            b.fehler_(o, "Absatz ohne Herkunft – 'quellen: [IDs]' aus den Stammdaten oder "
+                         "'herkunft: anzeige | nutzer' angeben")
+            continue
+        if a.get("art") == "hauptteil" and not quellen:
+            b.fehler_(o, "ein Absatz 'hauptteil' braucht mindestens eine Quelle aus den Stammdaten")
+        gueltig = True
+        for q in quellen:
+            art = sd.art(q)
+            if art is None:
+                b.fehler_(f"{o}.quellen", f"unbekannte ID '{q}'")
+                gueltig = False
+                continue
+            if art not in ABSATZ_QUELLEN:
+                b.fehler_(f"{o}.quellen", f"ID '{q}' ist ein(e) {art} und kann keine Quelle eines Absatzes sein")
+                gueltig = False
+                continue
+            obj = sd.obj(q)
+            if obj.get("veraltet"):
+                b.warnung(o, f"'{q}' ist als veraltet markiert")
+            if art == "skill" and obj.get("kategorie") == ARBEITSWEISE and q not in belegt:
+                b.fehler_(o, f"'{q}' (Arbeitsweise) hat keinen Beleg und darf nicht ins Anschreiben")
+            if art == "baustein" and obj.get("art") != a.get("art"):
+                b.warnung(o, f"Baustein '{q}' ist für '{obj.get('art')}' gedacht, der Absatz ist '{a.get('art')}'")
+        if not gueltig:
+            continue
+
+        text = a.get("text")
+        if isinstance(text, str) and "**" in text:
+            b.fehler_(o, "im Anschreiben gibt es kein Fett – '**' entfernen")
+        if not text:
+            if a.get("umformuliert"):
+                b.fehler_(o, "umformuliert: true, aber kein 'text' angegeben")
+            if len(quellen) != 1 or not freigegebene_texte(sd.obj(quellen[0]))[0]:
+                b.fehler_(o, "Absatz ohne 'text' – geht nur mit genau einer Quelle, die einen freigegebenen Text hat "
+                             "(Baustein, Tätigkeit, Projekt, Profiltext)")
+                continue
+        elif quellen:
+            freigegeben = {normal(ohne_fett(t)) for q in quellen for t in freigegebene_texte(sd.obj(q)) if t}
+            ist_freigegeben = normal(ohne_fett(text)) in freigegeben
+            if not a.get("umformuliert") and not ist_freigegeben:
+                b.fehler_(o, f"Text weicht von den Stammdaten zu {', '.join(quellen)} ab – als 'umformuliert: true' "
+                             "kennzeichnen oder freigegebenen Text verwenden")
+            if a.get("umformuliert") and ist_freigegeben:
+                b.warnung(o, "Text ist inzwischen freigegeben – 'umformuliert: true' entfernen")
+        elif a.get("umformuliert"):
+            b.warnung(o, "'umformuliert' gilt nur für Absätze mit Quellen – bei reiner Herkunft weglassen")
+        texte.append(absatz_text(sd, a))
+
+    woerter = len(" ".join(texte).split())
+    if texte and not ANSCHREIBEN_WOERTER[0] <= woerter <= ANSCHREIBEN_WOERTER[1]:
+        b.warnung(ort, f"{woerter} Wörter im Brieftext – Ziel sind etwa 250–350")
+    if bew is not None:
+        anrede = (bew.get("empfaenger") or {}).get("anrede") if isinstance(bew.get("empfaenger"), dict) else None
+        for t in texte + [x for x in (an.get("betreff"), anrede) if isinstance(x, str)]:
+            for p in PLATZHALTER_MUSTER.findall(t):
+                b.fehler_(ort, f"Platzhalter {p} ist noch nicht ersetzt")
+    return {"anschreiben": an, "bewerbung": bew}
+
+
+def briefdatum(bew: dict) -> date | None:
+    """Das Datum aus bewerbung.yaml (Tag der Freigabe), solange es noch ein Platzhalter ist: None."""
+    datum = bew.get("datum")
+    if isinstance(datum, date):   # YAML liest ein Datum ohne Anführungszeichen als date
+        return datum
+    if isinstance(datum, str) and DATUM_MUSTER.match(datum):
+        try:
+            return date.fromisoformat(datum)
+        except ValueError:
+            return None
+    return None
+
+
+def datum_lang(tag: date) -> str:
+    return f"{tag.day}. {MONATSNAMEN[tag.month - 1]} {tag.year}"
+
+
+def baue_anschreiben_kontext(sd: Stammdaten, ll: dict, an: dict, bew: dict | None, heute: date) -> dict:
+    """Aufbereitete Daten für ein Anschreiben-Gegenstück. Ohne bewerbung.yaml stehen Platzhalter darin."""
+    p = sd.person
+    ort_zeile = " ".join(str(x) for x in (p.get("plz"), p["wohnort"]) if x)
+    adresse = [p["strasse"], ort_zeile] if p.get("strasse") else [ort_zeile]
+    kontakt = [x for x in (p.get("telefon"), p.get("email")) if x] + list(p.get("web") or [])
+
+    if bew:
+        e = bew.get("empfaenger") or {}
+        stelle = GENDER_MUSTER.sub("", str(bew["stelle"])).strip()
+        empfaenger = [bew["firma"], e.get("abteilung"), e.get("ansprechperson"), e.get("strasse"),
+                      " ".join(str(x) for x in (e.get("plz"), e.get("ort")) if x)]
+        anrede = e.get("anrede") or "Sehr geehrte Damen und Herren,"
+        kennziffer = bew.get("kennziffer")
+        tag = briefdatum(bew) or heute
+    else:
+        stelle, empfaenger, anrede, kennziffer, tag = "[Stelle]", ["[Firma]"], "Sehr geehrte Damen und Herren,", None, heute
+    if not anrede.rstrip().endswith(","):
+        anrede = anrede.rstrip() + ","
+
+    schalter = an.get("schalter") or {}
+    unterschrift = None
+    if schalter.get("unterschrift", True) and p.get("unterschrift"):
+        unterschrift = (sd.ordner / p["unterschrift"]).resolve().as_uri()
+
+    return {
+        "person": {"name": p["name"], "adresse": adresse, "kontakt": kontakt,
+                   "kontakt_zeile": [", ".join(adresse)] + kontakt},
+        "ruecksende": " · ".join([p["name"], *adresse]) if p.get("strasse") else None,
+        "untertitel": ll.get("untertitel"),
+        "empfaenger": [z for z in empfaenger if z],
+        "ort_datum": f"{p['wohnort']}, {datum_lang(tag)}",
+        "betreff": an.get("betreff") or f"Bewerbung als {stelle}",
+        "kennziffer": kennziffer,
+        "anrede": anrede,
+        "absaetze": [{"art": a["art"], "text": absatz_text(sd, a), "quellen": " ".join(a.get("quellen") or []),
+                      "herkunft": a.get("herkunft"), "umformuliert": bool(a.get("umformuliert"))}
+                     for a in an["absaetze"]],
+        "gruss": "Mit freundlichen Grüßen",
+        "unterschrift": unterschrift,
+    }
+
+
 # --------------------------------------------------------------------------- Aufbereitung
 
 def monat(m: str) -> str:
@@ -938,13 +1185,15 @@ def auszeichnung(text: str) -> markupsafe.Markup:
     return markupsafe.Markup(FETT_MUSTER.sub(r"<b>\1</b>", sicher))
 
 
-def rendere_html(kontext: dict, grundlayout: str, stil: dict) -> str:
+def rendere_html(kontext: dict, grundlayout: str, stil: dict, anschreiben: bool = False) -> str:
+    """Lebenslauf (<grundlayout>.html.j2) oder Anschreiben (<grundlayout>.anschreiben.html.j2)."""
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(GRUNDLAYOUT_ORDNER),
         autoescape=True, undefined=jinja2.StrictUndefined,
     )
     env.filters["auszeichnung"] = auszeichnung
-    return env.get_template(f"{grundlayout}.html.j2").render(**kontext, stil=stil)
+    datei = f"{grundlayout}.anschreiben.html.j2" if anschreiben else f"{grundlayout}.html.j2"
+    return env.get_template(datei).render(**kontext, stil=stil)
 
 
 # --------------------------------------------------------------------------- PDF
@@ -1034,7 +1283,7 @@ def pruefe_spalten(hoehen: dict[str, float]) -> None:
             print(f"HINWEIS  Spalte '{name}' ist {hoehe - haupt:.0f} mm länger als die Hauptspalte (wirkt unausgewogen)")
 
 
-def pruefe_pdf(pdf: Path, name: str) -> bool:
+def pruefe_pdf(pdf: Path, name: str, max_seiten: int = MAX_SEITEN) -> bool:
     """Seitenzahl und Textextrahierbarkeit (ATS). Gibt False bei Fehlern zurück."""
     reader = PdfReader(pdf)
     seiten = len(reader.pages)
@@ -1042,15 +1291,15 @@ def pruefe_pdf(pdf: Path, name: str) -> bool:
     zeichen = sum(len(normal(t)) for t in texte)
     ok = True
     print(f"PDF      {rel(pdf)}: {seiten} Seite{'n' if seiten != 1 else ''}, {zeichen} Zeichen extrahierbar")
-    if seiten > MAX_SEITEN:
-        print(f"FEHLER   {seiten} Seiten – höchstens {MAX_SEITEN} erlaubt, bitte kürzen")
+    if seiten > max_seiten:
+        print(f"FEHLER   {seiten} Seiten – höchstens {max_seiten} erlaubt, bitte kürzen")
         ok = False
     if zeichen == 0:
         print("FEHLER   kein Text extrahierbar – das PDF ist für ATS unbrauchbar")
         ok = False
     elif normal(name) not in normal(" ".join(texte)):
         print(f"WARNUNG  Name '{name}' im extrahierten Text nicht gefunden – Textextraktion prüfen")
-    if seiten == 2 and texte[0]:
+    if seiten == 2 and texte[0] and max_seiten >= 2:
         fuellung = len(normal(texte[1])) / max(1, len(normal(texte[0])))
         if fuellung < 0.35:
             print(f"WARNUNG  Seite 2 ist nur zu etwa {fuellung:.0%} gefüllt – auf 1 Seite kürzen oder auffüllen")
@@ -1067,21 +1316,26 @@ def standard_ordner() -> list[Path]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Lebenslauf aus Stammdaten rendern und prüfen.")
-    ap.add_argument("ordner", nargs="*", type=Path, help="Ordner mit lebenslauf.yaml")
+    ap = argparse.ArgumentParser(description="Lebenslauf und Anschreiben aus Stammdaten rendern und prüfen.")
+    ap.add_argument("ordner", nargs="*", type=Path, help="Ordner mit lebenslauf.yaml (und optional anschreiben.yaml)")
     ap.add_argument("--pruefen", action="store_true", help="nur prüfen, kein PDF erzeugen")
     ap.add_argument("--daten", type=Path, default=REPO / "daten",
                     help="Daten-Ordner mit stammdaten/, standard/, einstellungen.yaml … (Standard: daten/)")
-    ap.add_argument("--html", action="store_true", help="zusätzlich lebenslauf.html (mit data-quelle) in den Ordner schreiben")
+    ap.add_argument("--html", action="store_true",
+                    help="zusätzlich lebenslauf.html bzw. anschreiben.html (mit data-quelle) in den Ordner schreiben")
+    ap.add_argument("--nur-anschreiben", action="store_true",
+                    help="nur das Anschreiben rendern, den Lebenslauf nicht anfassen (z. B. bei der Freigabe)")
     ap.add_argument("--vorschau", metavar="TEMPLATE",
-                    help="die Lebensläufe (Standard: alle Standardlebensläufe) mit diesem Template nach vorschau/<ordner>/ "
-                         "rendern, ohne ihre lebenslauf.yaml oder ihr PDF zu ändern")
+                    help="die Lebensläufe und Anschreiben (Standard: alle Standardlebensläufe) mit diesem Template nach "
+                         "vorschau/<ordner>/ rendern, ohne ihre YAML-Dateien oder PDFs zu ändern")
     args = ap.parse_args(argv)
 
     if args.pruefen and args.vorschau:
         ap.error("--pruefen und --vorschau nicht zusammen verwenden")
     if not args.pruefen and not args.vorschau and len(args.ordner) != 1:
         ap.error("genau einen Ordner angeben oder --pruefen bzw. --vorschau verwenden")
+    if args.nur_anschreiben and (args.pruefen or args.vorschau):
+        ap.error("--nur-anschreiben nur zusammen mit genau einem Ordner verwenden")
 
     global DATEN
     DATEN = args.daten.resolve()
@@ -1107,12 +1361,17 @@ def main(argv: list[str] | None = None) -> int:
         ordner_liste = args.ordner or [o for o in standard_ordner() if o != ENTWURF]
     else:
         ordner_liste = args.ordner or (standard_ordner() if args.pruefen else [])
-    lebenslaeufe = {o: pruefe_lebenslauf(sd, o, b, g) for o in ordner_liste} if not b.fehler else {}
+    lebenslaeufe, anschreiben = {}, {}
+    if not b.fehler:
+        lebenslaeufe = {o: pruefe_lebenslauf(sd, o, b, g) for o in ordner_liste}
+        anschreiben = {o: pruefe_anschreiben(sd, o, b) for o in ordner_liste if (o / "anschreiben.yaml").exists()}
+    if args.nur_anschreiben and not anschreiben:
+        b.fehler_(rel(args.ordner[0] / "anschreiben.yaml"), "Datei fehlt")
     b.ausgeben()
     if b.fehler:
         print(f"Prüfung fehlgeschlagen: {len(b.fehler)} Fehler, {len(b.warnungen)} Warnungen.")
         return 1
-    geprueft = ", ".join(rel(o) for o in ordner_liste) or "keine Lebensläufe"
+    geprueft = ", ".join(rel(o) + (" (mit Anschreiben)" if o in anschreiben else "") for o in ordner_liste)         or "keine Lebensläufe"
     print(f"Prüfung bestanden ({rel(stammdaten_ordner())}; {geprueft}; {len(b.warnungen)} Warnungen).")
     if args.pruefen:
         return 0
@@ -1123,18 +1382,29 @@ def main(argv: list[str] | None = None) -> int:
             ziel = VORSCHAU / ordner.name
             ziel.mkdir(parents=True, exist_ok=True)
             print()
-            ergebnisse.append((ordner, rendere_lebenslauf(sd, g, lebenslaeufe[ordner], args.vorschau, ziel, args.html)))
+            ll = lebenslaeufe[ordner]
+            ergebnisse.append((ziel / "lebenslauf.pdf", ordner,
+                               rendere_lebenslauf(sd, g, ll, args.vorschau, ziel, args.html)))
+            if ordner in anschreiben:
+                ergebnisse.append((ziel / "anschreiben.pdf", ordner,
+                                   rendere_anschreiben(sd, g, ll, anschreiben[ordner], args.vorschau, ziel, args.html)))
         print()
-        for ordner, ok in ergebnisse:
-            pdf = VORSCHAU / ordner.name / "lebenslauf.pdf"
+        for pdf, ordner, ok in ergebnisse:
             seiten = len(PdfReader(pdf).pages)
             print(f"VORSCHAU {rel(ordner)} -> {rel(pdf)}: {seiten} Seite{'n' if seiten != 1 else ''}, "
                   f"{'in Ordnung' if ok else 'FEHLER'}")
-        return 0 if all(ok for _, ok in ergebnisse) else 2
+        return 0 if all(ok for _, _, ok in ergebnisse) else 2
 
     ordner = args.ordner[0]
-    template = template_fuer(g, lebenslaeufe[ordner])
-    return 0 if rendere_lebenslauf(sd, g, lebenslaeufe[ordner], template, ordner, args.html) else 2
+    ll = lebenslaeufe[ordner]
+    template = template_fuer(g, ll)
+    ok = True
+    if not args.nur_anschreiben:
+        ok = rendere_lebenslauf(sd, g, ll, template, ordner, args.html)
+    if ordner in anschreiben:
+        print()
+        ok = rendere_anschreiben(sd, g, ll, anschreiben[ordner], template, ordner, args.html) and ok
+    return 0 if ok else 2
 
 
 def rendere_lebenslauf(sd: Stammdaten, g: Gestaltung, ll: dict, template: str, ziel: Path, mit_html: bool) -> bool:
@@ -1149,6 +1419,20 @@ def rendere_lebenslauf(sd: Stammdaten, g: Gestaltung, ll: dict, template: str, z
     ok = pruefe_pdf(pdf, sd.person["name"])
     pruefe_spalten(miss_spalten(html))
     return ok
+
+
+def rendere_anschreiben(sd: Stammdaten, g: Gestaltung, ll: dict, ab: dict, template: str, ziel: Path,
+                        mit_html: bool) -> bool:
+    """Rendert das Anschreiben (Ergebnis von pruefe_anschreiben) nach ziel/anschreiben.pdf: genau 1 Seite."""
+    grundlayout, stil = baue_stil(g, template)
+    print(f"ANSCHREIBEN {template} (Grundlayout {grundlayout})")
+    kontext = baue_anschreiben_kontext(sd, ll, ab["anschreiben"], ab["bewerbung"], date.today())
+    html = rendere_html(kontext, grundlayout, stil, anschreiben=True)
+    if mit_html:
+        (ziel / "anschreiben.html").write_text(html, encoding="utf-8")
+    pdf = ziel / "anschreiben.pdf"
+    drucke_pdf(html, pdf)
+    return pruefe_pdf(pdf, sd.person["name"], max_seiten=1)
 
 
 if __name__ == "__main__":

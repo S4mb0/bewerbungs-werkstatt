@@ -13,4 +13,6 @@ __pycache__/
 # Erzeugte Dateien der Beispieldaten
 beispiel/**/lebenslauf.pdf
 beispiel/**/lebenslauf.html
+beispiel/**/anschreiben.pdf
+beispiel/**/anschreiben.html
 daten-sicherung-*/
