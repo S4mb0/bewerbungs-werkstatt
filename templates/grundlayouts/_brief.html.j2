@@ -1,0 +1,41 @@
+{#- Der Briefteil des Anschreibens (angelehnt an DIN 5008), gemeinsam für alle Anschreiben-Gegenstücke.
+    Ein Gegenstück importiert ihn mit: import "_brief.html.j2" as B with context – und setzt B.stil() in sein <style>.
+    Absender, Name und Kontakt zeigt jedes Gegenstück selbst, passend zu seinem Grundlayout.
+    data-quelle / data-herkunft / data-umformuliert sind unsichtbar und erscheinen nicht im PDF. -#}
+
+{%- macro stil() %}
+  p { margin: 0; }
+  .ruecksende { display: inline-block; font-size: 7.5pt; color: #5a5a5a; padding-bottom: .4mm;
+                border-bottom: .5pt solid var(--line); margin-bottom: 2mm; }
+  .empfaenger { min-height: 27mm; }
+  .datum { text-align: right; margin: 5mm 0 7mm; }
+  .betreff { font-weight: 700; }
+  .kennziffer { color: #5a5a5a; }
+  .anrede { margin: 6mm 0 3mm; }
+  .absatz { margin: 0 0 2.6mm; }
+  .gruss { margin-top: 4mm; }
+  .unterschrift { display: block; height: 13mm; margin: 1.5mm 0 .5mm; }
+  .unterzeichner { margin-top: 9mm; }
+  .unterschrift + .unterzeichner { margin-top: 0; }
+{%- endmacro %}
+
+{%- macro brief() %}
+  <div class="brief">
+    {%- if ruecksende %}
+    <p class="ruecksende">{{ ruecksende }}</p>
+    {%- endif %}
+    <div class="empfaenger">{% for z in empfaenger %}<p>{{ z }}</p>{% endfor %}</div>
+    <p class="datum">{{ ort_datum }}</p>
+    <p class="betreff">{{ betreff }}</p>
+    {%- if kennziffer %}
+    <p class="kennziffer">Kennziffer: {{ kennziffer }}</p>
+    {%- endif %}
+    <p class="anrede">{{ anrede }}</p>
+    {%- for a in absaetze %}
+    <p class="absatz" data-art="{{ a.art }}"{% if a.quellen %} data-quelle="{{ a.quellen }}"{% endif %}{% if a.herkunft %} data-herkunft="{{ a.herkunft }}"{% endif %}{% if a.umformuliert %} data-umformuliert="ja"{% endif %}>{{ a.text }}</p>
+    {%- endfor %}
+    <p class="gruss">{{ gruss }}</p>
+    {%- if unterschrift %}<img class="unterschrift" src="{{ unterschrift }}" alt="Unterschrift">{% endif %}
+    <p class="unterzeichner">{{ person.name }}</p>
+  </div>
+{%- endmacro %}

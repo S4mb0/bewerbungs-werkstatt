@@ -176,7 +176,7 @@ Dieser Ordner ist ein eigenes Git-Repo und gehört **nicht** ins System-Repo dar
 Er enthält Foto, Kontaktdaten, Zeugnisse und Bewerbungen: lokal lassen oder nur in ein **privates** Remote pushen.
 
 - `stammdaten/` – alle Inhalte (Person, Berufserfahrung, Ausbildung, Projekte, Skills, Kategorien, Schwerpunkte)
-- `standard/<schwerpunkt>/` – Standardlebensläufe
+- `standard/<schwerpunkt>/` – Standardlebensläufe und -anschreiben
 - `bewerbungen/` – versendete Bewerbungen
 - `anlagen/` – bereinigte Nachweise
 - `templates/` – eigene Templates

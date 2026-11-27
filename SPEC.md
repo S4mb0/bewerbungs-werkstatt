@@ -4,10 +4,10 @@ Jeder Abschnitt fasst eine Entscheidung zusammen. Begriffe: [GLOSSARY.md](GLOSSA
 
 ## Ziel
 
-Aus **Stammdaten** und einem **Template** entsteht pro **Schwerpunkt** ein **Standardlebenslauf**. Ein Claude-Code-Skill passt ihn in höchstens 15 Minuten (inklusive Gegenlesen) an eine **Stellenausschreibung** an und gibt ihn als PDF aus. Jede versendete **Bewerbung** wird abgelegt.
+Aus **Stammdaten** und einem **Template** entsteht pro **Schwerpunkt** ein **Standardlebenslauf**. Ein Claude-Code-Skill passt ihn in höchstens 15 Minuten (inklusive Gegenlesen) an eine **Stellenausschreibung** an und gibt ihn als PDF aus, auf Wunsch in höchstens 10 Minuten mehr mit einem **Anschreiben** (Abschnitt 10). Jede versendete **Bewerbung** wird abgelegt.
 
 Feste Regeln:
-- Jede Aussage im Lebenslauf ist durch die Stammdaten **gedeckt**. Die KI formuliert um, erfindet aber nichts.
+- Jede Aussage über den Nutzer, in Lebenslauf und Anschreiben, ist durch die Stammdaten **gedeckt**. Die KI formuliert um, erfindet aber nichts.
 - Das System ist öffentlich und enthält nichts Persönliches. Persönliche Daten liegen nur in `daten/`, lokal oder in einem **privaten** Remote.
 - Jeder Nutzer braucht Claude Code (Pro oder höher), Python ≥ 3.10, git und Chrome, Edge oder Chromium. Ein GitHub-Account ist nicht nötig.
 - Windows, macOS und Linux.
@@ -20,7 +20,7 @@ Feste Regeln:
 |---|---|
 | `render.py` | YAML → HTML → PDF und alle Prüfungen |
 | `templates/<name>.yaml` | mitgelieferte Templates: Grundlayout + Parameter |
-| `templates/grundlayouts/` | Grundlayouts (Jinja2 + erlaubte Parameter) |
+| `templates/grundlayouts/` | Grundlayouts (Jinja2 + erlaubte Parameter), je mit Anschreiben-Gegenstück |
 | `templates/schriften/` | Schriften mit freier Lizenz (SIL OFL) |
 | `beispiel/` | vollständige Beispieldaten (erfundene Person), für Tests und Vorschaubilder |
 | `tests/` | Tests für `render.py`, Migrationen und `einrichten.py`; `tests/schemas/v<N>/` Altdaten je Schemaversion |
@@ -28,9 +28,9 @@ Feste Regeln:
 | `README.md`, `LICENSE` | Anleitung für Nutzer; MIT (Schriften: OFL) |
 | `.github/workflows/tests.yml` | CI auf Windows, macOS, Linux |
 | `einrichten.py`, `migrationen.py`, `umgebung.py` | Umgebung einrichten, Daten anlegen, migrieren, aktualisieren |
-| `.claude/skills/einrichten/` | Skill: Ersteinrichtung – Daten-Repo, Person und Foto, Import, Schwerpunkte, Template, Standardlebensläufe |
+| `.claude/skills/einrichten/` | Skill: Ersteinrichtung – Daten-Repo, Person und Foto, Import, Schwerpunkte, Template, Standardlebensläufe, optional Standardanschreiben |
 | `.claude/skills/stammdaten-pflegen/` | Skill: Stammdaten erfassen, ändern, Schwerpunkte anlegen |
-| `.claude/skills/lebenslauf-anpassen/` | Skill: Stellenausschreibung → Bewerbung |
+| `.claude/skills/lebenslauf-anpassen/` | Skill: Stellenausschreibung → Bewerbung, optional mit Anschreiben |
 | `.claude/skills/template-pflegen/` | Skill: eigene Templates anlegen, ändern, veralten lassen; Standard-Template wählen |
 | `.claude/skills/regeln.md` | gemeinsame Regeln der Skills |
 | `entwurf/` (gitignoriert) | Arbeitsordner während einer Anpassung |
@@ -42,7 +42,7 @@ Feste Regeln:
 | Ordner/Datei | Zweck |
 |---|---|
 | `stammdaten/*.yaml` | die eine vollständige Quelle aller Inhalte, dazu das Foto |
-| `standard/<schwerpunkt>/` | Standardlebensläufe (`lebenslauf.yaml` + PDF) |
+| `standard/<schwerpunkt>/` | Standardlebensläufe (`lebenslauf.yaml` + PDF), optional Standardanschreiben (`anschreiben.yaml` + PDF) |
 | `bewerbungen/<datum>_<firma>_<stelle>/` | versendete Bewerbungen |
 | `anlagen/` | bereinigte Nachweise |
 | `templates/` | eigene Templates |
@@ -50,7 +50,7 @@ Feste Regeln:
 
 ## 1. Stammdaten
 
-- YAML, eine Datei pro Art: `person.yaml`, `berufserfahrung.yaml`, `ausbildung.yaml`, `projekte.yaml`, `skills.yaml`, `kategorien.yaml`, `profil.yaml`.
+- YAML, eine Datei pro Art: `person.yaml`, `berufserfahrung.yaml`, `ausbildung.yaml`, `projekte.yaml`, `skills.yaml`, `kategorien.yaml`, `profil.yaml`, optional `anschreiben.yaml` (Bausteine und Rahmendaten, Abschnitt 10).
 - Ein **Arbeitgeber** hat eine oder mehrere **Positionen** (Zeitraum, Art, Titel). Jede Position hat **Tätigkeiten**. Eine Tätigkeit besteht aus einer Kernaussage und Details (Pflicht) und optional aus freigegebenen Formulierungen. Dazu kommen Schwerpunkte und belegte Skills.
 - Ein **Projekt** hat einen Kontext (privat, Studium oder beruflich), optional einen Zeitraum, optional Repo-Links und kann mehrere Repos bündeln.
 - **Abschluss**: Art, offizielle Bezeichnung, Institution, Zeitraum, Note, Status (abgeschlossen oder laufend), optional ein Thema und eine Anlage.
@@ -77,7 +77,7 @@ Feste Regeln:
 
 - PyYAML, Jinja2 und pypdf stehen in `requirements.txt` und werden in eine lokale `.venv/` installiert (gitignoriert). Gibt es die venv, startet sich `render.py` selbst darin neu; der Aufruf ist immer `python render.py …`.
 - `lebenslauf.yaml` enthält nur das Variable: Schwerpunkt, optional das Template, Untertitel, Profiltext, Schalter und die gewählten Einträge als `{quelle: <ID>, text, umformuliert}`. Das Feste liest `render.py` aus den Stammdaten.
-- `render.py <ordner>` erzeugt das PDF im selben Ordner. `--pruefen` prüft Schema, IDs und Verweise sowie Templates, Grundlayouts, Schriften und `einstellungen.yaml`. `--vorschau <template>` rendert alle Standardlebensläufe mit einem Template nach `vorschau/`, ohne sie zu ändern. `--daten <ordner>` wählt einen anderen Daten-Ordner, z. B. `beispiel`.
+- `render.py <ordner>` erzeugt das PDF im selben Ordner, liegt dort ein `anschreiben.yaml`, auch das Anschreiben (`--nur-anschreiben`: nur dieses). `--pruefen` prüft Schema, IDs und Verweise sowie Templates, Grundlayouts, Schriften und `einstellungen.yaml`. `--vorschau <template>` rendert alle Standardlebensläufe mit einem Template nach `vorschau/`, ohne sie zu ändern. `--daten <ordner>` wählt einen anderen Daten-Ordner, z. B. `beispiel`.
 - Die IDs stehen als unsichtbare `data-quelle`-Attribute im HTML. Das Skript bricht ab, wenn eine ID unbekannt ist oder eine Aussage keine Quelle hat.
 - Nach dem Rendern prüft pypdf die Seitenzahl und ob der Text extrahierbar ist (ATS). Bei Grundlayouts mit Spalten misst `render.py` im Browser die Höhe jeder Spalte: Hinweis, wenn eine Nebenspalte länger als die Hauptspalte ist, Warnung, wenn sie dadurch eine Seite mehr braucht.
 
@@ -103,7 +103,8 @@ Regeln:
   - `lebenslauf.yaml` (immer mit Feld `template`, damit das Aussehen nicht vom späteren Standard-Template abhängt)
   - `lebenslauf.pdf` (eingefroren)
   - `stellenausschreibung.md`
-  - `bewerbung.yaml` mit Firma, Stelle, Datum, Schwerpunkt und `status`
+  - `bewerbung.yaml` mit Firma, Stelle, Datum, Schwerpunkt und `status`, für das Anschreiben auch Kennziffer und Empfänger
+  - optional `anschreiben.yaml` und `anschreiben.pdf` (eingefroren)
 - Den `status` pflegt der Nutzer per Zuruf. Weitere Auswertungen gibt es nicht.
 - `person.yaml`, das Foto und die bereinigten Anlagen liegen im Daten-Repo. Originaldokumente bleiben beim Nutzer.
 - Die Skills committen nur im Daten-Repo und pushen nur, wenn es ein Remote hat. Ein Remote muss privat sein.
@@ -119,7 +120,7 @@ Regeln:
 
 ## 7. Templates
 
-- Ein **Template** ist ein **Grundlayout** plus Parameter: Akzentfarbe (Linien und Flächen werden daraus aufgehellt, die Linienfarbe ist überschreibbar), Schrift, Fotoform (eckig oder rund) und -position, Stil der Überschriften (Linie, Balken, fett) und Reihenfolge der Abschnitte. Es bestimmt das Aussehen der ganzen Bewerbungsunterlagen; Anschreiben bekommen später ein passendes Gegenstück je Grundlayout.
+- Ein **Template** ist ein **Grundlayout** plus Parameter: Akzentfarbe (Linien und Flächen werden daraus aufgehellt, die Linienfarbe ist überschreibbar), Schrift, Fotoform (eckig oder rund) und -position, Stil der Überschriften (Linie, Balken, fett) und Reihenfolge der Abschnitte. Es bestimmt das Aussehen der ganzen Bewerbungsunterlagen: Zu jedem Grundlayout gehört ein Anschreiben-Gegenstück (Abschnitt 10).
 - Mitgelieferte Templates liegen in `templates/` und werden von Updates überschrieben, eigene in `daten/templates/`. Ein Name kommt nur einmal vor.
 - Ein **Grundlayout** (`templates/grundlayouts/<name>.html.j2` + `.yaml`) legt die Struktur fest und welche Parameter möglich sind: erlaubte Fotopositionen, Spalten mit ihren Abschnitten, ob weißer Text auf der Akzentfarbe steht (dann Kontrast ≥ 4,5). Neue Grundlayouts kommen nur über Branch und PR dazu.
 - Mitgeliefert: `klassisch` (einspaltig, ATS-sicher), `zwei-spalten` (getönte Seitenleiste mit Foto, Kontakt, Kenntnissen und Sprachen; im HTML steht die Hauptspalte zuerst, damit ATS die Reihenfolge richtig lesen), `kopfband` (farbiges Band oben über die volle Breite). Später denkbar: `minimal`, `zeitleiste`.
@@ -141,13 +142,25 @@ Regeln:
 
 ## 9. Einrichten
 
-- Der Skill `einrichten` führt einen neuen Nutzer in dieser Reihenfolge: Umgebung (`einrichten.py`), Daten-Repo (lokal oder zusätzlich privates GitHub-Repo, Sichtbarkeit geprüft), Person und Foto, Import des bisherigen Lebenslaufs und weiterer Nachweise (sonst Interview), Nachfragen, Schwerpunkte und Kategorien, Template, Standardlebensläufe.
+- Der Skill `einrichten` führt einen neuen Nutzer in dieser Reihenfolge: Umgebung (`einrichten.py`), Daten-Repo (lokal oder zusätzlich privates GitHub-Repo, Sichtbarkeit geprüft), Person und Foto, Import des bisherigen Lebenslaufs und weiterer Nachweise (sonst Interview), Nachfragen, Schwerpunkte und Kategorien, Template, Standardlebensläufe, optional Anschreiben (Absender, Import alter Anschreiben, Standardanschreiben).
 - Aus Dokumenten Gelesenes ist ein Vorschlag, bis der Nutzer es bestätigt. Unklares kommt nach `offen.md`, nicht in die Stammdaten.
 - Die Einrichtung lässt sich abbrechen und an der Stelle fortsetzen, die die vorhandenen Dateien zeigen.
 - Das Schema deckt auch Berufe außerhalb der IT ab: Positionsarten u. a. Teilzeit, Minijob, Freiberuflich, Selbstständig, Ehrenamt; Abschlüsse auch als Weiterbildung; Projekte auch im Ehrenamt; Kategorien frei.
 
+## 10. Anschreiben
+
+- Optional pro Bewerbung. `lebenslauf-anpassen` fragt nach dem Zeigen des Lebenslaufs danach, oder der Nutzer sagt es gleich mit der Anzeige. Es entsteht im selben Entwurf und wird mit dem Lebenslauf freigegeben.
+- **Faktentreue zweigeteilt**: Jeder Absatz hat eine Art (`einstieg`, `hauptteil`, `motivation`, `rahmen`, `schluss`) und `quellen` aus den Stammdaten oder eine `herkunft` (`anzeige`, `nutzer`). Ein Hauptteil hat immer Quellen. Abweichende Texte sind `umformuliert`. Motivation kommt nur vom Nutzer: Der Skill fragt einmal nach und macht Vorschläge aus der Anzeige, erfindet aber keine Gründe.
+- **Standardanschreiben** je Schwerpunkt (`daten/standard/<schwerpunkt>/anschreiben.yaml`, mit Platzhaltern `[Firma]`, `[Stelle]`) sind der Ausgangspunkt. Sie entstehen in `einrichten`, gern aus importierten alten Anschreiben. Das Anschreiben einer früheren Bewerbung ist nie Ausgangspunkt, damit keine firmenspezifischen Sätze weiterwandern.
+- **Bausteine** (`stammdaten/anschreiben.yaml`) sind freigegebene Absätze ohne Firmenbezug für Einstieg, Motivation und Schluss. Erfahrung steht nie in Bausteinen, sondern in Tätigkeiten, Projekten und deren Formulierungen. Bei der Freigabe fragt der Skill gesammelt, was übernommen wird.
+- **Rahmendaten** (Verfügbarkeit, Gehalt) stehen nur im Anschreiben, wenn die Anzeige danach fragt; das Gehalt fragt der Skill pro Bewerbung ab.
+- **Briefbogen** angelehnt an DIN 5008: Absender (Straße und PLZ optional in `person.yaml`), Empfänger, Ort und Datum, Betreff „Bewerbung als <Stelle>“ (ohne „(m/w/d)“, mit Kennziffer), Anrede, Text, Gruß, optional eingescannte Unterschrift (`person.yaml`, pro Anschreiben abschaltbar). Empfänger, Kennziffer und Anrede stehen in `bewerbung.yaml`. Das Datum ist der Tag der Freigabe; dafür wird das Anschreiben bei der Freigabe einmal neu gerendert.
+- Genau 1 Seite, etwa 250–350 Wörter, Ich-Form, kein Foto, kein Fett, keine Anlagen-Zeile. Dieselben Untergrenzen für Schrift und Ränder wie beim Lebenslauf; `render.py` prüft Seitenzahl und Textextraktion.
+- **Aussehen**: Jedes Grundlayout hat ein Gegenstück `templates/grundlayouts/<name>.anschreiben.html.j2` (gemeinsamer Briefteil `_brief.html.j2`). Der Brieftext ist einspaltig; vom Lebenslauf übernimmt das Gegenstück das prägende Element (Kopf mit Linie, farbiges Band, getönte Seitenleiste mit dem Kontakt) und alle Template-Parameter außer dem Foto. Ein Anschreiben nimmt immer das Template des Lebenslaufs im selben Ordner.
+- Eine eigene Datei `anschreiben.pdf`; die Bewerbungsmappe bleibt eine spätere Erweiterung.
+
 ## Nicht Teil dieser Spezifikation
 
-- Anschreiben: kommt als Erweiterung, auf Basis der freigegebenen Formulierungen.
-- Englische Unterlagen, Projektliste als Zusatzdokument, Bewerbungsmappe (Lebenslauf + Anlagen als ein PDF). Für alle drei hält die Struktur den Weg offen.
+- Englische Unterlagen, Projektliste als Zusatzdokument, Bewerbungsmappe (Lebenslauf + Anschreiben + Anlagen als ein PDF). Für alle drei hält die Struktur den Weg offen.
+- Ein Anschreiben für eine bereits abgelegte Bewerbung nachreichen.
 - GUI, Bewerbungs-Tracking über das Statusfeld hinaus.

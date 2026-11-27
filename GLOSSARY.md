@@ -90,8 +90,20 @@ Ein angepasster Lebenslauf, den der Nutzer noch nicht freigegeben hat; wird erst
 _Avoid_: Draft, Zwischenstand
 
 **Bewerbung**:
-Ein tatsächlich versendeter Lebenslauf zusammen mit seiner Stellenausschreibung, Firma und Datum.
+Ein tatsächlich versendeter Lebenslauf, gegebenenfalls mit Anschreiben, zusammen mit seiner Stellenausschreibung, Firma und Datum.
 _Avoid_: Versand, Version, Application
+
+**Anschreiben**:
+Der Brief zu einer Bewerbung, eine Seite, im selben Template wie ihr Lebenslauf. Besteht aus Absätzen; jede Aussage über den Nutzer ist durch Stammdaten gedeckt, Bezüge auf Firma und Stelle kommen aus der Stellenausschreibung, die Motivation vom Nutzer.
+_Avoid_: Motivationsschreiben, Cover Letter
+
+**Standardanschreiben**:
+Ein vom Nutzer freigegebenes Anschreiben für einen Schwerpunkt, mit Platzhaltern statt Firma und Stelle; Ausgangspunkt jedes Anschreibens einer Bewerbung.
+_Avoid_: Musteranschreiben, Vorlage
+
+**Baustein**:
+Ein freigegebener Absatz fürs Anschreiben ohne Bezug auf eine bestimmte Firma: Einstieg, Motivation oder Schluss. Gehört zu den Stammdaten. Aussagen über die eigene Erfahrung sind nie Bausteine, sondern Tätigkeiten, Projekte oder Formulierungen.
+_Avoid_: Textbaustein-Sammlung, Snippet
 
 **Anlage**:
 Ein Nachweis-Dokument (Zeugnis, Urkunde), das einer Bewerbung beiliegt. Keine Stammdaten.

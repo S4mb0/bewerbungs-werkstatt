@@ -2,8 +2,11 @@
 id: person
 name: Max Mustermann
 wohnort: Musterstadt
+strasse: Musterweg 1          # Absender im Anschreiben (optional)
+plz: "12345"
 telefon: "+49 000 0000000"
 email: max.mustermann@example.org
 web:
   - github.com/beispiel
 foto: foto.svg   # relativ zu diesem Ordner
+unterschrift: unterschrift.svg   # optional, nur im Anschreiben

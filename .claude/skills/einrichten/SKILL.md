@@ -1,6 +1,6 @@
 ---
 name: einrichten
-description: Richtet die Bewerbungs-Werkstatt für einen neuen Nutzer ein - Umgebung prüfen, Daten-Repo anlegen, Person und Foto erfassen, den bisherigen Lebenslauf importieren, Schwerpunkte, Kategorien und Template festlegen und die ersten Standardlebensläufe erstellen. Verwenden beim ersten Start, wenn daten/ fehlt oder unvollständig ist, oder wenn der Nutzer sagt „richte mich ein“ bzw. eine abgebrochene Einrichtung fortsetzen will.
+description: Richtet die Bewerbungs-Werkstatt für einen neuen Nutzer ein - Umgebung prüfen, Daten-Repo anlegen, Person und Foto erfassen, den bisherigen Lebenslauf importieren, Schwerpunkte, Kategorien und Template festlegen, die ersten Standardlebensläufe und auf Wunsch Standardanschreiben (aus alten Anschreiben) erstellen. Verwenden beim ersten Start, wenn daten/ fehlt oder unvollständig ist, wenn der Nutzer sagt „richte mich ein“ bzw. eine abgebrochene Einrichtung fortsetzen will, oder wenn er Anschreiben einrichten oder seine alten Anschreiben importieren will.
 ---
 
 # Einrichten
@@ -24,7 +24,10 @@ Die Einrichtung lässt sich jederzeit abbrechen und später fortsetzen. Stell an
 | `profil.yaml` oder `kategorien.yaml` fehlt | 5 |
 | kein `daten/standard/*/lebenslauf.yaml` | 6 |
 | ein Schwerpunkt ohne Standardlebenslauf | 7 |
+| kein `daten/standard/*/anschreiben.yaml` und der Nutzer hat Anschreiben nicht abgelehnt (`daten/einstellungen.yaml` ohne `anschreiben: nein`) | 8 (optional, vorher fragen) |
 | alles da | fertig, siehe „Danach“ |
+
+Bei Schritt 8 fragst du zuerst, ob der Nutzer Anschreiben jetzt einrichten will. Bei Nein ist die Einrichtung fertig; ein späterer Lauf fragt wieder, bis er „nie“ sagt. Dann trägst du `anschreiben: nein` in `daten/einstellungen.yaml` ein und committest.
 
 ## 1. Umgebung und Daten-Repo
 
@@ -42,7 +45,7 @@ Fertig, wenn `daten/` ein Git-Repo mit einem ersten Commit ist.
 
 ## 2. Person und Foto
 
-Frag in einer Nachricht nach: Name, Wohnort (nur Ort, keine Straße), Telefon, E-Mail, Web-Links (z. B. LinkedIn, GitHub, Portfolio), optional Geburtsdatum und -ort, und ob ein **Foto** in den Lebenslauf soll. In Deutschland ist es üblich, aber freiwillig.
+Frag in einer Nachricht nach: Name, Wohnort (nur Ort), Telefon, E-Mail, Web-Links (z. B. LinkedIn, GitHub, Portfolio), optional Geburtsdatum und -ort, und ob ein **Foto** in den Lebenslauf soll. In Deutschland ist es üblich, aber freiwillig. Straße, PLZ und Unterschrift fragst du erst in Schritt 8: Sie gehören nur ins Anschreiben.
 
 Liegt ein Foto vor:
 
@@ -143,10 +146,47 @@ Korrekturen einarbeiten, bis er freigibt. Commit je Schwerpunkt: `Standardlebens
 
 Ist der erste Standardlebenslauf freigegeben und der Nutzer will Templates vergleichen, mach Schritt 6 jetzt mit `--vorschau`.
 
+## 8. Anschreiben (optional)
+
+Am Ende gibt es Bausteine und Rahmendaten in `daten/stammdaten/anschreiben.yaml` und je Schwerpunkt ein freigegebenes **Standardanschreiben** in `daten/standard/<schwerpunkt>/anschreiben.yaml`. Von ihm startet `lebenslauf-anpassen` (Schritt 6), wenn eine Bewerbung ein Anschreiben bekommt. Aufbau wie `beispiel/stammdaten/anschreiben.yaml` und `beispiel/standard/devops/anschreiben.yaml`, Regeln in `regeln.md` (Abschnitt „Anschreiben“).
+
+### 8.1 Absender und Unterschrift
+
+Frag in einer Nachricht:
+- **Straße und PLZ** für den Absender. Optional: Ohne sie steht im Anschreiben nur der Wohnort wie im Lebenslauf.
+- **Unterschrift**: Gibt es einen Scan (PNG mit transparentem oder weißem Hintergrund, gern auch SVG)? Dann kopierst du ihn nach `daten/stammdaten/unterschrift.<endung>` und siehst ihn dir mit dem Read-Tool an (lesbar, eng zugeschnitten). Ohne Scan steht nur der Name unter dem Gruß.
+
+In `person.yaml` als `strasse`, `plz` (in Anführungszeichen) und `unterschrift` eintragen, Diff zeigen, nach OK committen: `Stammdaten: Absender fürs Anschreiben`.
+
+### 8.2 Alte Anschreiben importieren
+
+Frag nach bisherigen Anschreiben (PDF oder Word, beliebig viele). Lies sie wie in Schritt 3. Ohne Dokumente führst du ein kurzes **Interview**: wie er sich typischerweise vorstellt, was ihn an seiner Arbeit antreibt, wie er abschließt, wie viel Kündigungsfrist er hat und welches Gehalt er sich vorstellt.
+
+Zerleg jedes Anschreiben in Absätze und ordne jeden zu:
+
+- **Aussagen über die eigene Erfahrung** (später `hauptteil`): Gibt es die passende Tätigkeit, das Projekt oder den Abschluss schon, schlag gelungene Sätze als `formulierungen` dort vor. Steht der Sachverhalt noch nicht in den Stammdaten, ist das neu: wie in Schritt 3 als Tätigkeit oder Projekt vorschlagen, Unklares nach `offen.md`. Einen Baustein „hauptteil“ gibt es nicht.
+- **Einstieg, Motivation, Schluss**: Schlag **Bausteine** vor (`baust-<thema>`, Art `einstieg`, `motivation` oder `schluss`, `schwerpunkte` nur, wenn der Baustein nur zu bestimmten passt). Nur ohne Bezug auf eine bestimmte Firma oder Stelle: Firmenspezifisches verallgemeinerst du oder lässt es weg. Floskeln („hiermit bewerbe ich mich“) übernimmst du nicht.
+- **Rahmendaten**: Verfügbarkeit und Gehaltsvorstellung kommen nach `rahmen`, nur was der Nutzer für heute bestätigt.
+
+Achte dabei auf seinen **Ton** (förmlich oder locker, kurze oder lange Sätze, wie er sich selbst beschreibt). Die Bausteine bewahren ihn; nenn ihn in einem Satz.
+
+Zeig eine Übersicht: neue Bausteine im Wortlaut, neue Formulierungen mit ihrer ID, neue Einträge, Rahmendaten. Nach OK schreiben, `render.py --pruefen`, Commit: `Stammdaten: Bausteine fürs Anschreiben aus <Quellen>`.
+
+### 8.3 Standardanschreiben
+
+Für jeden Schwerpunkt `daten/standard/<schwerpunkt>/anschreiben.yaml`, neben dem Standardlebenslauf:
+
+- **einstieg** mit Platzhaltern `[Stelle]` und `[Firma]` (`herkunft: anzeige`), dazu ein passender Einstiegs-Baustein
+- **hauptteil**: 2–3 Absätze zu den stärksten Tätigkeiten und Projekten des Schwerpunkts, je mit `quellen`, erzählt statt aufgezählt, nur aus Kernaussage, Details und Formulierungen der Quellen
+- **motivation** und **schluss** aus Bausteinen, kein **rahmen** (der kommt nur, wenn eine Anzeige danach fragt)
+- 250–350 Wörter, Ich-Form, kein Fett; Umformuliertes mit `umformuliert: true`
+
+`python render.py daten/standard/<schwerpunkt>` rendert Lebenslauf und Anschreiben neu; das Anschreiben hat genau 1 Seite. Sieh dir das PDF mit dem Read-Tool an und zeig es dem Nutzer, mit je einer Zeile pro Absatz (Art und Quellen). Korrekturen einarbeiten, bis er freigibt. Commit je Schwerpunkt: `Standardanschreiben <schwerpunkt>`. Hat das Daten-Repo ein Remote, danach pushen.
+
 ## Danach
 
 Sag in wenigen Sätzen, wie es weitergeht:
-- **Stellenanzeige** schicken (Text oder Link) → `lebenslauf-anpassen`
+- **Stellenanzeige** schicken (Text oder Link) → `lebenslauf-anpassen`, auf Wunsch mit Anschreiben („mit Anschreiben“)
 - **Neues** aus Beruf oder Projekten erzählen → `stammdaten-pflegen`
 - anderes **Aussehen** → `template-pflegen`
 - **Updates** des Systems: `python einrichten.py --aktualisieren`

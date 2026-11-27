@@ -45,5 +45,6 @@ jobs:
           name: pdf-${{ matrix.os }}
           path: |
             beispiel/standard/devops/lebenslauf.pdf
-            vorschau/**/lebenslauf.pdf
+            beispiel/standard/devops/anschreiben.pdf
+            vorschau/**/*.pdf
           if-no-files-found: ignore

@@ -1,0 +1,41 @@
+{#- Anschreiben zum Grundlayout „klassisch“: derselbe Kopf wie im Lebenslauf (Name, Untertitel, Kontakt, Linie in der
+    Akzentfarbe), ohne Foto und Profil, darunter der Briefbogen. Ränder nach DIN 5008 (links 25 mm, rechts 20 mm).
+    Bekommt von render.py fertig aufbereitete Daten (baue_anschreiben_kontext) und die Template-Parameter in `stil`. -#}
+{%- import "_abschnitte.html.j2" as A -%}
+{%- import "_brief.html.j2" as B with context -%}
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Anschreiben {{ person.name }}</title>
+<style>
+  {{- A.schriften(stil) }}
+  @page { size: A4; margin: 12mm 20mm 12mm 25mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: {{ stil.schrift.stack | safe }}; color: #222; font-size: 10.5pt; line-height: 1.42; }
+  @media screen {
+    body { background: #e9ecef; }
+    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 12mm 20mm 12mm 25mm; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.15); }
+  }
+  .page { --acc: {{ stil.farbe }}; --line: {{ stil.linienfarbe }}; }
+  header { border-bottom: 2px solid var(--acc); padding-bottom: 3mm; margin-bottom: 9mm; line-height: 1.28; }
+  h1 { margin: 0; font-size: 20pt; font-weight: 600; color: var(--acc); }
+  .sub { margin: .5mm 0 1.5mm; font-size: 11pt; color: #5a5a5a; }
+  .contact { font-size: 9.2pt; color: #5a5a5a; }
+  .contact span { white-space: nowrap; }   /* Umbruch nur zwischen den Angaben, nie in der Telefonnummer */
+  .contact span + span::before { content: "·"; margin: 0 2.2mm; color: var(--line); }
+  {{- B.stil() }}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>{{ person.name }}</h1>
+    {%- if untertitel %}<p class="sub">{{ untertitel }}</p>{% endif %}
+    <p class="contact">{% for k in person.kontakt_zeile %}<span>{{ k }}</span>{% endfor %}</p>
+  </header>
+  {{- B.brief() }}
+</div>
+</body>
+</html>

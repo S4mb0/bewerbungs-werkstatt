@@ -1,6 +1,6 @@
 ---
 name: stammdaten-pflegen
-description: Erfasst und ändert die Stammdaten des Nutzers (Tätigkeiten, Projekte, Skills, Abschlüsse, Formulierungen) im Gespräch und legt neue Schwerpunkte an. Verwenden, wenn der Nutzer etwas Neues über seine Arbeit, Projekte oder Abschlüsse erzählt, einen Eintrag korrigieren oder veralten lassen will, oder wenn ein neuer Schwerpunkt gebraucht wird.
+description: Erfasst und ändert die Stammdaten des Nutzers (Tätigkeiten, Projekte, Skills, Abschlüsse, Formulierungen, Bausteine und Rahmendaten fürs Anschreiben) im Gespräch und legt neue Schwerpunkte an. Verwenden, wenn der Nutzer etwas Neues über seine Arbeit, Projekte oder Abschlüsse erzählt, einen Eintrag korrigieren oder veralten lassen will, oder wenn ein neuer Schwerpunkt gebraucht wird.
 ---
 
 # Stammdaten pflegen
@@ -20,7 +20,7 @@ Vor dem ersten Schritt liest du [`../regeln.md`](../regeln.md). Sie gilt für je
 
 Lies die betroffenen Stammdaten-Dateien und ordne jede Aussage des Nutzers zu:
 
-- **Art**: Tätigkeit, Projekt, Skill, Abschluss, Formulierung zu einem bestehenden Eintrag, Korrektur oder `veraltet`.
+- **Art**: Tätigkeit, Projekt, Skill, Abschluss, Formulierung zu einem bestehenden Eintrag, Korrektur oder `veraltet`. Fürs Anschreiben außerdem: **Baustein** (Einstieg, Motivation oder Schluss ohne Bezug auf eine bestimmte Firma, in `anschreiben.yaml`) oder **Rahmendaten** (Verfügbarkeit, Gehalt). Was der Nutzer über seine Erfahrung erzählt, wird nie ein Baustein, sondern eine Tätigkeit, ein Projekt oder eine Formulierung.
 - **Ort**: bei einer Tätigkeit Arbeitgeber und Position (über den Zeitraum), bei einem Projekt der Kontext.
 - **Neu oder Ergänzung**: Deckt ein bestehender Eintrag denselben Sachverhalt, ergänzt du ihn (Details, Formulierung, Skills). Seine ID bleibt.
 - **Belege**: welche Skills der Eintrag belegt. Fehlt ein Skill in `skills.yaml`, legst du ihn mit an.
@@ -69,10 +69,10 @@ Fertig, wenn der Commit steht.
 
 Prüf für jeden Ordner unter `daten/standard/`, ob die Änderung ihn betrifft:
 
-- er zitiert eine geänderte oder veraltete ID (`grep -l <id> daten/standard/*/lebenslauf.yaml`), oder
+- sein Lebenslauf oder Anschreiben zitiert eine geänderte oder veraltete ID (`grep -l <id> daten/standard/*/*.yaml`), oder
 - ein neuer Eintrag trägt seinen Schwerpunkt.
 
-Nenne die betroffenen Standardlebensläufe mit einem Satz, was sich ändern würde, und frag, ob du sie nachziehen sollst. Bei Ja: ändern, `render.py daten/standard/<schwerpunkt>` (höchstens 2 Seiten, ohne Füllwarnung), PDF mit dem Read-Tool ansehen, der Nutzer zeigen, nach Freigabe committen. Bei Nein bleibt der Standardlebenslauf, wie er ist.
+Nenne die betroffenen Standardlebensläufe mit einem Satz, was sich ändern würde, und frag, ob du sie nachziehen sollst. Bei Ja: ändern, `render.py daten/standard/<schwerpunkt>` (Lebenslauf höchstens 2 Seiten, ohne Füllwarnung; ein Anschreiben genau 1 Seite), PDF mit dem Read-Tool ansehen, der Nutzer zeigen, nach Freigabe committen. Bei Nein bleibt der Standardlebenslauf, wie er ist.
 
 ## B. Neuer Schwerpunkt
 
@@ -102,6 +102,6 @@ Der Nutzer bestätigt oder korrigiert. Neu zeigen musst du nur, was er geändert
 - `render.py daten/standard/<id>`: höchstens 2 Seiten, Ziel 1, ohne Füllwarnung
 - PDF mit dem Read-Tool ansehen, dann dem Nutzer zeigen, mit einem Satz Begründung zur Auswahl
 
-Korrekturen einarbeiten, bis der Nutzer freigibt. Dann alles in einem Commit: `Schwerpunkt <id> angelegt`.
+Gibt es Standardanschreiben für andere Schwerpunkte, bietest du eins für den neuen an (Aufbau wie in `einrichten`, Schritt 8.3). Korrekturen einarbeiten, bis der Nutzer freigibt. Dann alles in einem Commit: `Schwerpunkt <id> angelegt`.
 
 Fertig, wenn der Commit steht. Kam der Anlass aus `lebenslauf-anpassen`, geht es dort mit dem neuen Schwerpunkt in Schritt 3 weiter.

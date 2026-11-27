@@ -2,7 +2,7 @@
 
 Bewerbungsunterlagen aus eigenen, geprüften Fakten – in wenigen Minuten an jede Stellenausschreibung angepasst, mit [Claude Code](https://claude.com/claude-code).
 
-Du pflegst einmal deine **Stammdaten**: Stationen, Tätigkeiten, Abschlüsse, Skills, jeweils mit Beleg. Für eine Stellenausschreibung wählt Claude daraus das Passende, stellt es in den Vordergrund, formuliert es mit den Begriffen der Anzeige um und erzeugt ein PDF. Dabei gilt eine feste Regel: **Jede Aussage im Lebenslauf stammt aus deinen Stammdaten.** Claude formuliert um, erfindet aber nichts. Fehlt etwas, das die Anzeige verlangt, fragt Claude nach, statt es dazuzuschreiben.
+Du pflegst einmal deine **Stammdaten**: Stationen, Tätigkeiten, Abschlüsse, Skills, jeweils mit Beleg. Für eine Stellenausschreibung wählt Claude daraus das Passende, stellt es in den Vordergrund, formuliert es mit den Begriffen der Anzeige um und erzeugt ein PDF, auf Wunsch mit passendem **Anschreiben**. Dabei gilt eine feste Regel: **Jede Aussage über dich stammt aus deinen Stammdaten.** Claude formuliert um, erfindet aber nichts. Fehlt etwas, das die Anzeige verlangt, fragt Claude nach, statt es dazuzuschreiben.
 
 | klassisch | zwei-spalten | kopfband |
 |---|---|---|
@@ -63,11 +63,11 @@ Skills sind Abläufe, die Claude Code in diesem Ordner kennt. Du rufst sie nicht
 
 > Richte mich ein. · Hier ist mein alter Lebenslauf: ~/Dokumente/lebenslauf.pdf
 
-Er legt `daten/` an, wahlweise nur lokal oder zusätzlich in einem privaten GitHub-Repo. Dann erfasst er Person und Foto und liest deinen bisherigen Lebenslauf und Zeugnisse ein. Ohne Dokumente fragt er im Interview ab. Was unklar ist, fragt er nach. Mit dir zusammen legt er **Schwerpunkte** fest, also die Richtungen, in die du dich bewirbst, und die **Kategorien** deiner Kenntnisse. Am Ende stehen ein Template und je Schwerpunkt ein **Standardlebenslauf**, den du freigibst.
+Er legt `daten/` an, wahlweise nur lokal oder zusätzlich in einem privaten GitHub-Repo. Dann erfasst er Person und Foto und liest deinen bisherigen Lebenslauf und Zeugnisse ein. Ohne Dokumente fragt er im Interview ab. Was unklar ist, fragt er nach. Mit dir zusammen legt er **Schwerpunkte** fest, also die Richtungen, in die du dich bewirbst, und die **Kategorien** deiner Kenntnisse. Am Ende stehen ein Template und je Schwerpunkt ein **Standardlebenslauf**, den du freigibst. Auf Wunsch liest er auch deine **alten Anschreiben** ein, macht daraus wiederverwendbare Bausteine (Einstieg, Motivation, Schluss) und je Schwerpunkt ein **Standardanschreiben**.
 
 ### `lebenslauf-anpassen`: für eine konkrete Stelle
 
-> Hier ist eine Stelle: https://example.org/jobs/123 · Kürz die Projekte, nimm dafür die Wundversorgung rein. · Passt, freigeben.
+> Hier ist eine Stelle: https://example.org/jobs/123 · Kürz die Projekte, nimm dafür die Wundversorgung rein. · Schreib ein Anschreiben dazu. · Passt, freigeben.
 
 Er speichert den Anzeigentext und wählt den passenden Schwerpunkt. In einer Nachricht zeigt er dir:
 - das PDF
@@ -75,7 +75,9 @@ Er speichert den Anzeigentext und wählt den passenden Schwerpunkt. In einer Nac
 - die **Lücken** als Fragen
 - was er beim Kürzen gestrichen hat
 
-Du korrigierst im Chat. Bei der Freigabe legt er die Bewerbung unter `daten/bewerbungen/` ab und fragt, ob gelungene Formulierungen in die Stammdaten übernommen werden sollen. Ziel: höchstens 15 Minuten von der Anzeige bis zur Freigabe.
+Danach fragt er, ob ein **Anschreiben** dazukommen soll. Es startet vom Standardanschreiben deines Schwerpunkts, erzählt die stärksten Treffer und fragt dich einmal, was dich an der Stelle reizt: Gründe erfindet er nicht. Das Anschreiben hat eine Seite, im selben Template wie der Lebenslauf.
+
+Du korrigierst im Chat. Bei der Freigabe legt er die Bewerbung unter `daten/bewerbungen/` ab und fragt, ob gelungene Formulierungen in die Stammdaten übernommen werden sollen. Ziel: höchstens 15 Minuten von der Anzeige bis zur Freigabe, mit Anschreiben 25.
 
 ### `stammdaten-pflegen`: Neues erfassen
 
@@ -87,7 +89,7 @@ Du erzählst frei, er ordnet zu und fragt nur nach, was für Faktentreue und Pfl
 
 > Mach mir ein Template mit Seitenleiste in Dunkelgrün. · Die Überschriften lieber mit Balken. · Nimm kopfband als Standard.
 
-Ein **Template** ist ein Grundlayout (`klassisch`, `zwei-spalten`, `kopfband`) plus Farbe, Schrift, Fotoform und -position, Stil der Überschriften und Reihenfolge der Abschnitte. Der Skill zeigt dir eine Vorschau mit all deinen Standardlebensläufen, bevor er etwas speichert. Eigene Templates liegen in `daten/templates/`.
+Ein **Template** ist ein Grundlayout (`klassisch`, `zwei-spalten`, `kopfband`) plus Farbe, Schrift, Fotoform und -position, Stil der Überschriften und Reihenfolge der Abschnitte. Zu jedem Grundlayout gehört ein passendes Anschreiben. Der Skill zeigt dir eine Vorschau mit all deinen Standardlebensläufen und -anschreiben, bevor er etwas speichert. Eigene Templates liegen in `daten/templates/`.
 
 ## Was wo liegt
 
@@ -102,7 +104,7 @@ bewerbungs-werkstatt/            ← dieses Repo (öffentlich, das System)
 ├── entwurf/, vorschau/          Arbeitsordner (gitignoriert)
 └── daten/                       ← deine Daten: eigenes Git-Repo, gitignoriert
     ├── stammdaten/              Person, Foto, Berufserfahrung, Ausbildung, Projekte, Skills …
-    ├── standard/<schwerpunkt>/  Standardlebensläufe
+    ├── standard/<schwerpunkt>/  Standardlebensläufe und -anschreiben
     ├── bewerbungen/             versendete Bewerbungen mit Anzeigentext
     ├── anlagen/                 bereinigte Nachweise
     ├── templates/               eigene Templates
@@ -115,7 +117,7 @@ Alle Daten sind Textdateien (YAML). Du kannst sie auch von Hand bearbeiten; `pyt
 
 ```bash
 python render.py --pruefen                      # Stammdaten und Lebensläufe prüfen
-python render.py daten/standard/<schwerpunkt>   # einen Lebenslauf als PDF erzeugen
+python render.py daten/standard/<schwerpunkt>   # Lebenslauf (und Anschreiben, falls vorhanden) als PDF erzeugen
 python render.py --vorschau kopfband            # alle Standardlebensläufe mit einem Template nach vorschau/
 python render.py --daten beispiel beispiel/standard/devops   # mit den Beispieldaten ausprobieren
 ```
@@ -139,7 +141,7 @@ Du musst nicht selbst daran denken: Zu Beginn jedes Skills schaut Claude mit `py
 - Tests: `python -m unittest discover -s tests` mit dem Python der `.venv` (`.venv/Scripts/python` bzw. `.venv/bin/python`). Die CI führt sie bei jedem PR auf Windows, macOS und Linux aus.
 - **Regel für Datenänderungen:** Wer etwas ändert, das vorhandene Daten ungültig macht (Feld umbenannt, neues Pflichtfeld, Datei verschoben), erhöht die Schemaversion. Dazu gehören eine Migration in `migrationen.py` und Altdaten unter `tests/schemas/v<N>/`. Ein Test erzwingt das. Neue *optionale* Felder brauchen keine Migration.
 - Entscheidungen und Begriffe: [SPEC.md](SPEC.md), [GLOSSARY.md](GLOSSARY.md). Die Regeln, an die sich die Skills halten: [.claude/skills/regeln.md](.claude/skills/regeln.md).
-- Geplant: Anschreiben aus den eigenen freigegebenen Formulierungen, englische Unterlagen, Bewerbungsmappe als ein PDF.
+- Geplant: englische Unterlagen, Bewerbungsmappe als ein PDF, Anschreiben für bereits abgelegte Bewerbungen nachreichen.
 
 ## Für Claude: Installation auf Zuruf
 

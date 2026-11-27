@@ -173,6 +173,132 @@ class KaputteDaten(unittest.TestCase):
         self.ersetze("stammdaten/skills.yaml", "skills:", "skills: [")
         self.erwarte_fehler("kein gültiges YAML")
 
+    # ---------------------------------------------------------------- Anschreiben
+
+    BEWERBUNG = ('firma: Beispiel AG\nstelle: DevOps Engineer (m/w/d)\ndatum: "2026-03-05"\nschwerpunkt: devops\n'
+                 'status: entwurf\nkennziffer: DO-42\nempfaenger:\n  ansprechperson: Frau Dr. Erika Beispiel\n'
+                 '  strasse: Hauptstraße 5\n  plz: "54321"\n  ort: Beispielstadt\n  anrede: Sehr geehrte Frau Dr. Beispiel\n')
+
+    def als_bewerbung(self):
+        """Macht aus dem Standardanschreiben eine Bewerbung: bewerbung.yaml dazu, Platzhalter ersetzt."""
+        (self.tmp / "lebenslauf" / "bewerbung.yaml").write_text(self.BEWERBUNG, encoding="utf-8")
+        self.ersetze("lebenslauf/anschreiben.yaml", "als [Stelle] bei [Firma]", "als DevOps Engineer bei der Beispiel AG")
+
+    def test_anschreiben_beispiel_ist_gueltig(self):
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertIn("(mit Anschreiben)", aus)
+        self.assertNotIn("Wörter", aus)
+
+    def test_anschreiben_ist_optional(self):
+        (self.tmp / "stammdaten" / "anschreiben.yaml").unlink()
+        (self.tmp / "lebenslauf" / "anschreiben.yaml").unlink()
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertNotIn("(mit Anschreiben)", aus)
+
+    def test_anschreiben_absatz_ohne_herkunft(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "  - art: motivation\n    quellen: [baust-motivation-produkt]",
+                     "  - art: motivation\n    text: Frei erfundene Begeisterung.")
+        self.erwarte_fehler("Absatz ohne Herkunft")
+
+    def test_anschreiben_hauptteil_braucht_quellen(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "quellen: [taet-monitoring, taet-lasttests, proj-deploy-tool]",
+                     "herkunft: nutzer")
+        self.erwarte_fehler("ein Absatz 'hauptteil' braucht mindestens eine Quelle")
+
+    def test_anschreiben_unbekannte_quelle(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "taet-terraform]", "taet-gibts-nicht]")
+        self.erwarte_fehler("unbekannte ID 'taet-gibts-nicht'")
+
+    def test_anschreiben_falsche_art_als_quelle(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "[baust-motivation-produkt]", "[beispiel-technik]")
+        self.erwarte_fehler("ID 'beispiel-technik' ist ein(e) arbeitgeber und kann keine Quelle eines Absatzes sein")
+
+    def test_anschreiben_umformulierung_nicht_gekennzeichnet(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "    umformuliert: true\n", "")
+        self.erwarte_fehler("Text weicht von den Stammdaten zu baust-einstieg-betrieb ab")
+
+    def test_anschreiben_freigegebener_text_braucht_keine_kennzeichnung(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "  - art: schluss\n    quellen: [baust-schluss-gespraech]",
+                     "  - art: schluss\n    quellen: [baust-schluss-gespraech]\n    text: >-\n      Ich freue mich "
+                     "darauf, Sie in einem persönlichen Gespräch davon zu überzeugen, dass ich gut zu Ihrem Team passe.")
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+
+    def test_anschreiben_ohne_text_nur_mit_einer_quelle(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "    quellen: [baust-schluss-gespraech]",
+                     "    quellen: [baust-schluss-gespraech, taet-pipelines]")
+        self.erwarte_fehler("Absatz ohne 'text' – geht nur mit genau einer Quelle")
+
+    def test_anschreiben_kein_fett(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "auf Kubernetes und", "auf **Kubernetes** und")
+        self.erwarte_fehler("im Anschreiben gibt es kein Fett")
+
+    def test_anschreiben_baustein_hauptteil_gibt_es_nicht(self):
+        self.ersetze("stammdaten/anschreiben.yaml", "art: motivation", "art: hauptteil")
+        self.erwarte_fehler("'hauptteil' ist nicht erlaubt")
+
+    def test_anschreiben_baustein_falsche_art(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "  - art: schluss\n    quellen: [baust-schluss-gespraech]",
+                     "  - art: einstieg\n    quellen: [baust-schluss-gespraech]")
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertIn("Baustein 'baust-schluss-gespraech' ist für 'schluss' gedacht", aus)
+
+    def test_anschreiben_rahmen_braucht_text(self):
+        self.ersetze("lebenslauf/anschreiben.yaml", "  - art: schluss\n",
+                     "  - art: rahmen\n    quellen: [rahmen]\n  - art: schluss\n")
+        self.erwarte_fehler("Absatz ohne 'text' – geht nur mit genau einer Quelle")
+
+    def test_anschreiben_zu_kurz(self):
+        (self.tmp / "lebenslauf" / "anschreiben.yaml").write_text(
+            "absaetze:\n  - {art: hauptteil, quellen: [taet-pipelines]}\n  - {art: schluss, quellen: [baust-schluss-gespraech]}\n",
+            encoding="utf-8")
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        self.assertIn("Wörter im Brieftext – Ziel sind etwa 250–350", aus)
+
+    def test_anschreiben_unterschrift_fehlt(self):
+        self.ersetze("stammdaten/person.yaml", "unterschrift: unterschrift.svg", "unterschrift: gibts-nicht.png")
+        self.erwarte_fehler("Unterschrift 'gibts-nicht.png' nicht gefunden")
+
+    def test_anschreiben_platzhalter_in_bewerbung(self):
+        (self.tmp / "lebenslauf" / "bewerbung.yaml").write_text(self.BEWERBUNG, encoding="utf-8")
+        self.erwarte_fehler("Platzhalter [Stelle] ist noch nicht ersetzt")
+
+    def test_anschreiben_bewerbung_unbekanntes_feld(self):
+        self.als_bewerbung()
+        (self.tmp / "lebenslauf" / "bewerbung.yaml").write_text(self.BEWERBUNG + "gehalt: viel\n", encoding="utf-8")
+        self.erwarte_fehler("unbekanntes Feld 'gehalt'")
+
+    def test_anschreiben_kontext(self):
+        self.als_bewerbung()
+        code, aus = self.pruefen()
+        self.assertEqual(code, 0, aus)
+        b = render.Befunde()
+        sd = render.lade_stammdaten(self.tmp / "stammdaten", b)
+        ordner = self.tmp / "lebenslauf"
+        ab = render.pruefe_anschreiben(sd, ordner, b)
+        ll = render.pruefe_lebenslauf(sd, ordner, b)
+        k = render.baue_anschreiben_kontext(sd, ll, ab["anschreiben"], ab["bewerbung"], render.date(2030, 1, 1))
+        self.assertEqual(k["betreff"], "Bewerbung als DevOps Engineer")   # ohne (m/w/d)
+        self.assertEqual(k["kennziffer"], "DO-42")
+        self.assertEqual(k["anrede"], "Sehr geehrte Frau Dr. Beispiel,")
+        self.assertEqual(k["ort_datum"], "Musterstadt, 5. März 2026")      # Datum aus bewerbung.yaml
+        self.assertEqual(k["empfaenger"], ["Beispiel AG", "Frau Dr. Erika Beispiel", "Hauptstraße 5", "54321 Beispielstadt"])
+        self.assertEqual(k["person"]["adresse"], ["Musterweg 1", "12345 Musterstadt"])
+        self.assertEqual(k["ruecksende"], "Max Mustermann · Musterweg 1 · 12345 Musterstadt")
+        self.assertTrue(k["unterschrift"])
+        self.assertEqual(k["absaetze"][-1]["text"], sd.obj("baust-schluss-gespraech")["text"])
+        # Platzhalter-Datum im Entwurf: heute
+        ab["bewerbung"]["datum"] = "<JJJJ-MM-TT>"
+        k = render.baue_anschreiben_kontext(sd, ll, ab["anschreiben"], ab["bewerbung"], render.date(2030, 1, 1))
+        self.assertEqual(k["ort_datum"], "Musterstadt, 1. Januar 2030")
+        # Standardanschreiben (ohne bewerbung.yaml): Platzhalter
+        k = render.baue_anschreiben_kontext(sd, ll, ab["anschreiben"], None, render.date(2030, 1, 1))
+        self.assertEqual((k["betreff"], k["empfaenger"]), ("Bewerbung als [Stelle]", ["[Firma]"]))
+
 
 @unittest.skipUnless(any(k and Path(k).exists() for k in render.CHROME_KANDIDATEN), "kein Chrome/Edge gefunden")
 class Kontext(unittest.TestCase):
@@ -212,6 +338,33 @@ class Rendern(unittest.TestCase):
                 self.assertNotIn("data-quelle", text)
                 if schalter == "einzeln":
                     self.assertIn("Werkstudent Softwareentwicklung", text)
+
+    def test_anschreiben_pdf(self):
+        with tempfile.TemporaryDirectory(prefix="render-test-") as tmp:
+            ordner = Path(tmp) / "bewerbung"
+            shutil.copytree(BEISPIEL / "standard" / "devops", ordner, ignore=shutil.ignore_patterns("*.pdf", "*.html"))
+            (ordner / "bewerbung.yaml").write_text(KaputteDaten.BEWERBUNG, encoding="utf-8")
+            pfad = ordner / "anschreiben.yaml"
+            pfad.write_text(pfad.read_text(encoding="utf-8").replace("als [Stelle] bei [Firma]", "bei der Beispiel AG"),
+                            encoding="utf-8")
+            aus = io.StringIO()
+            with contextlib.redirect_stdout(aus):
+                code = render.main(["--daten", str(BEISPIEL), "--html", "--nur-anschreiben", str(ordner)])
+            self.assertEqual(code, 0, aus.getvalue())
+            self.assertFalse((ordner / "lebenslauf.pdf").exists(), "--nur-anschreiben darf den Lebenslauf nicht rendern")
+            pdf = render.PdfReader(ordner / "anschreiben.pdf")
+            self.assertEqual(len(pdf.pages), 1)
+            text = pdf.pages[0].extract_text()
+            for erwartet in ("Max Mustermann", "Beispiel AG", "54321 Beispielstadt", "Bewerbung als DevOps Engineer",
+                             "Kennziffer: DO-42", "Musterstadt, 5. März 2026", "Sehr geehrte Frau Dr. Beispiel,",
+                             "Mit freundlichen Grüßen"):
+                self.assertIn(erwartet, text)
+            self.assertNotIn("(m/w/d)", text)
+            self.assertNotIn("data-quelle", text)
+            html = (ordner / "anschreiben.html").read_text(encoding="utf-8")
+            self.assertIn('data-quelle="taet-k8s-betrieb taet-pipelines taet-terraform" data-umformuliert="ja"', html)
+            self.assertIn('data-herkunft="anzeige"', html)
+            self.assertIn('alt="Unterschrift"', html)
 
 
 class Templates(unittest.TestCase):
@@ -333,6 +486,10 @@ class Templates(unittest.TestCase):
         self.variante("x", {"position: rechts": "position: links"})
         self.erwarte_fehler("'links' ist bei Grundlayout 'klassisch' nicht möglich")
 
+    def test_grundlayout_ohne_anschreiben_gegenstueck(self):
+        (self.sys / "grundlayouts" / "kopfband.anschreiben.html.j2").unlink()
+        self.erwarte_fehler("Grundlayout-Datei kopfband.anschreiben.html.j2 fehlt")
+
     def test_grundlayout_spalten_unvollstaendig(self):
         pfad = self.sys / "grundlayouts" / "zwei-spalten.yaml"
         pfad.write_text(pfad.read_text(encoding="utf-8").replace("seite: [kenntnisse]", "seite: [projekte]"),
@@ -367,6 +524,11 @@ class Templates(unittest.TestCase):
                 self.assertLess(text.index("Beispiel Technik GmbH"), text.index("Programmiersprachen"))
                 if name == "zwei-spalten":
                     self.assertIn("SPALTEN  haupt", aus)
+                # Das Anschreiben im selben Ordner nimmt dasselbe Template: 1 Seite, Name vorn
+                self.assertIn(f"ANSCHREIBEN {name} (Grundlayout {name})", aus)
+                pdf = render.PdfReader(self.tmp / "lebenslauf" / "anschreiben.pdf")
+                self.assertEqual(len(pdf.pages), 1)
+                self.assertTrue(pdf.pages[0].extract_text().lstrip().startswith("Max Mustermann"))
 
     @unittest.skipUnless(any(k and Path(k).exists() for k in render.CHROME_KANDIDATEN), "kein Chrome/Edge gefunden")
     def test_parameter_wirken(self):

@@ -1,0 +1,51 @@
+# BEISPIEL-Standardanschreiben (Schwerpunkt devops) auf Basis von beispiel/stammdaten.
+# Aufruf: python render.py --daten beispiel beispiel/standard/devops   (rendert Lebenslauf und Anschreiben)
+#
+# Template: immer das des Lebenslaufs im selben Ordner. Empfänger, Stelle und Datum kommen aus bewerbung.yaml;
+# im Standardanschreiben gibt es keine, dort stehen Platzhalter wie [Firma] und [Stelle].
+#
+# Jeder Absatz: {art, text, quellen, herkunft, umformuliert}
+#   - art: einstieg, hauptteil, motivation, rahmen oder schluss
+#   - quellen: IDs aus den Stammdaten (Tätigkeit, Projekt, Abschluss, Position, Skill, Profiltext, Baustein, rahmen)
+#   - herkunft: anzeige (Bezug auf Firma und Stelle) oder nutzer (vom Nutzer im Chat gesagt), für Text ohne Quelle
+#   - ohne text: der freigegebene Text der einzigen Quelle (z. B. ein Baustein)
+#   - umformuliert: true, wenn der Text von den freigegebenen Texten seiner Quellen abweicht
+#   Ein hauptteil braucht immer Quellen. Fett gibt es im Anschreiben nicht.
+schalter:
+  unterschrift: true
+absaetze:
+  - art: einstieg
+    quellen: [baust-einstieg-betrieb]
+    herkunft: anzeige
+    text: >-
+      seit mehreren Jahren sorge ich dafür, dass Software nicht nur entsteht, sondern zuverlässig läuft – von der
+      Pipeline bis zum Betrieb in der Cloud. Deshalb habe ich Ihre Ausschreibung als [Stelle] bei [Firma] mit
+      großem Interesse gelesen.
+    umformuliert: true
+  - art: hauptteil
+    quellen: [taet-k8s-betrieb, taet-pipelines, taet-terraform]
+    text: >-
+      Bei der Beispiel Technik GmbH verantworte ich den Betrieb von Microservices auf Kubernetes und pflege die
+      zugehörigen Manifeste. Die Auslieferung habe ich mit GitLab-CI/CD-Pipelines bis zum produktiven Deployment
+      automatisiert, die Cloud-Infrastruktur stelle ich als Code mit Terraform bereit. So entstehen Umgebungen, die
+      sich jederzeit reproduzieren lassen.
+    umformuliert: true
+  - art: hauptteil
+    quellen: [taet-monitoring, taet-lasttests, proj-deploy-tool]
+    text: >-
+      Damit Fehler früh auffallen, habe ich Logging und Monitoring mit Prometheus und Grafana aufgebaut und Lasttests
+      konzipiert, deren Auswertung die Grundlage für Performance-Optimierungen war. Wiederkehrende Abläufe
+      vereinheitliche ich gern mit eigenen Werkzeugen – etwa einem Kommandozeilen-Helfer, der Deployments über
+      mehrere Umgebungen gleich macht.
+    umformuliert: true
+  - art: hauptteil
+    quellen: [abschluss-fiae, abschluss-bsc, taet-server-betrieb]
+    text: >-
+      Mein Fundament ist eine Ausbildung zum Fachinformatiker für Anwendungsentwicklung, ergänzt durch ein
+      Informatikstudium. Aus meiner Zeit im Systemhaus bringe ich außerdem Erfahrung im Betrieb von Server- und
+      Client-Infrastrukturen mit.
+    umformuliert: true
+  - art: motivation
+    quellen: [baust-motivation-produkt]
+  - art: schluss
+    quellen: [baust-schluss-gespraech]
